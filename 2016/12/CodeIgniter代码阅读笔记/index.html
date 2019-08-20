@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>CodeIgniter 框架阅读 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="对web框架的安全，我主要关注了以下方面。  开发者如何拿到输入，框架对输入的处理方式 框架如何处理路由 框架如何封装数据库查询 框架对常见操作的处理（session，文件上传）  阅读的思路是先看整体框架的结构，然后通过看官方文档的描述然后找到对应代码阅读。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CodeIgniter 框架阅读">
+<meta property="og:url" content="http://5alt.me/2016/12/CodeIgniter代码阅读笔记/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="对web框架的安全，我主要关注了以下方面。  开发者如何拿到输入，框架对输入的处理方式 框架如何处理路由 框架如何封装数据库查询 框架对常见操作的处理（session，文件上传）  阅读的思路是先看整体框架的结构，然后通过看官方文档的描述然后找到对应代码阅读。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.784Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CodeIgniter 框架阅读">
+<meta name="twitter:description" content="对web框架的安全，我主要关注了以下方面。  开发者如何拿到输入，框架对输入的处理方式 框架如何处理路由 框架如何封装数据库查询 框架对常见操作的处理（session，文件上传）  阅读的思路是先看整体框架的结构，然后通过看官方文档的描述然后找到对应代码阅读。">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-CodeIgniter代码阅读笔记" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            CodeIgniter 框架阅读
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2016/12/CodeIgniter代码阅读笔记/">
+            <time datetime="2016-12-29T16:00:00.000Z" itemprop="datePublished">2016-12-30</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>对web框架的安全，我主要关注了以下方面。</p>
+<ul>
+<li>开发者如何拿到输入，框架对输入的处理方式</li>
+<li>框架如何处理路由</li>
+<li>框架如何封装数据库查询</li>
+<li>框架对常见操作的处理（session，文件上传）</li>
+</ul>
+<p>阅读的思路是先看整体框架的结构，然后通过看官方文档的描述然后找到对应代码阅读。<br><a id="more"></a></p>
+<h2 id="输入类"><a href="#输入类" class="headerlink" title="输入类"></a>输入类</h2><blockquote>
+<p>输入类有两个用途：</p>
+<ul>
+<li>为了安全性，对输入数据进行预处理</li>
+<li>提供了一些辅助方法来获取输入数据并处理</li>
+</ul>
+<p>安全性过滤<br>当访问 控制器 时，安全过滤方法会自动被调用， 它做了以下几件事情：</p>
+<ul>
+<li>如果 <code>$config[&#39;allow_get_array&#39;]</code> 设置为 FALSE （默认是 TRUE），销毁全局的 GET 数组。</li>
+<li>当开启 <code>register_globals</code> 时，销毁所有的全局变量。</li>
+<li>过滤 GET/POST/COOKIE 数据的键值，只允许出现字母和数字（和其他一些）字符。</li>
+<li>提供了 XSS （跨站脚本攻击）过滤，可全局启用，或按需启用。</li>
+<li>将换行符统一为 <code>PHP_EOL</code> （基于 UNIX 的系统下为 \n，Windows 系统下为 \r\n），这个是可配置的。</li>
+</ul>
+<p>XSS 过滤<br>输入类可以自动的对输入数据进行过滤，来阻止跨站脚本攻击。如果你希望在每次遇到 POST 或 COOKIE 数据时自动运行过滤，你可以在 <code>application/config/config.php</code> 配置文件中设置如下参数:<br><code>$config[&#39;global_xss_filtering&#39;] = TRUE;</code></p>
+</blockquote>
+<p>首先CI会对<code>$_GET</code>、<code>$_POST</code>、<code>$_COOKIE</code>的key和value进行处理，对应代码为<code>$this-&gt;_sanitize_globals();</code>。<br>对key处理的正则是<code>/^[a-z0-9:_\/|-]+$/i</code>，即只允许字母和数字，波浪符（~），百分号（%），句号（.），分号（:），下划线（_），连字号（-），空格。在key中一旦出现了非法字符就会exit。</p>
+<p>对value用<code>remove_invisible_characters</code>进行处理。该函数会把无法打印的字符替换成空。无法打印的字符定义如下。<br><code>$non_displayables[] = &#39;/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S&#39;;    // 00-08, 11, 12, 14-31, 127</code></p>
+<p>由此可见，可以在value中插入一些不可见字符，而不影响value的结果。这个性质可以用来bypass一些流量过滤型的waf。</p>
+<p>输入类里还定义了一个<code>is_ajax_request()</code>的函数用于判断是否是ajax请求，判断方式是<code>strtolower($_SERVER[&#39;HTTP_X_REQUESTED_WITH&#39;]) === &#39;xmlhttprequest&#39;</code>。</p>
+<h3 id="参考页面"><a href="#参考页面" class="headerlink" title="参考页面"></a>参考页面</h3><p><a href="http://codeigniter.org.cn/user_guide/libraries/input.html" target="_blank" rel="noopener">http://codeigniter.org.cn/user_guide/libraries/input.html</a><br><a href="http://codeigniter.org.cn/user_guide/general/security.html" target="_blank" rel="noopener">http://codeigniter.org.cn/user_guide/general/security.html</a></p>
+<h2 id="路由类"><a href="#路由类" class="headerlink" title="路由类"></a>路由类</h2><h3 id="URI-分段"><a href="#URI-分段" class="headerlink" title="URI 分段"></a>URI 分段</h3><blockquote>
+<p><code>example.com/class/function/ID</code></p>
+<ul>
+<li>第一段表示要调用的控制器 类 ；</li>
+<li>第二段表示要调用的类中的 函数 或 方法 ；</li>
+<li>第三段以及后面的段代表传给控制器的参数，如 ID 或其他任何变量，可以传递多个参数；</li>
+</ul>
+</blockquote>
+<p>即通过URL就能访问到控制器中的某个函数并能提供String类型的参数。<br>如果启用了查询字符串（ <code>application/config.php</code> 配置文件中<code>$config[&#39;enable_query_strings&#39;] = TRUE;</code>，默认关闭），那么可以输入数组类型的参数。</p>
+<p>其中不能通过URL直接访问到的私有方法的标志是方法声明为 private 或 protected 或者方法名前加上一个下划线前缀。</p>
+<p>CI框架会对URI的每个segment进行过滤，<code>$config[&#39;permitted_uri_chars&#39;] = &#39;a-z 0-9~%.:_\-&#39;;</code>。如果URI里有非法字符会直接400。</p>
+<h3 id="URI-路由"><a href="#URI-路由" class="headerlink" title="URI 路由"></a>URI 路由</h3><blockquote>
+<p>路由规则定义在 application/config/routes.php 文件中，在这个文件中你会 发现一个名为 $route 的数组，利用它你可以设置你自己的路由规则。 在路由规则中你可以使用通配符或正则表达式。</p>
+</blockquote>
+<p><code>$route[&#39;product/:num&#39;] = &#39;catalog/product_lookup&#39;;</code><br>自定义的路由可以用正则或者通配符，对应处理的函数也可以动态生成。</p>
+<p>在路由中使用 HTTP 动词<code>$route[&#39;products&#39;][&#39;put&#39;] = &#39;product/insert&#39;;</code>。</p>
+<h3 id="参考页面-1"><a href="#参考页面-1" class="headerlink" title="参考页面"></a>参考页面</h3><p><a href="http://codeigniter.org.cn/user_guide/general/urls.html" target="_blank" rel="noopener">http://codeigniter.org.cn/user_guide/general/urls.html</a><br><a href="http://codeigniter.org.cn/user_guide/general/routing.html" target="_blank" rel="noopener">http://codeigniter.org.cn/user_guide/general/routing.html</a></p>
+<h2 id="数据库查询"><a href="#数据库查询" class="headerlink" title="数据库查询"></a>数据库查询</h2><p>CI框架在进行数据库查询的时候没有对表名和列名进行处理，凡是能控制表名或者列名的地方都能引发注入。<br>在一些传输数组进行查询的地方，如<code>$this-&gt;db-&gt;where($array);</code>或者<code>$this-&gt;db-&gt;like($array);</code>，有可能从输入中引入表名。但是由于对数组的key的检查，导致很难通过注入列名的方式来攻击。<br>因此，对于CI框架，SQL注入主要发生在字符串拼接语句并带入查询的时候。</p>
+<p>如果存在反序列化漏洞，可能可以通过找一个能<code>__toString</code>的类来实例化，绕过对输入的escape。CI框架本身的类里不存在<code>__toString</code>方法。</p>
+<h3 id="参考页面-2"><a href="#参考页面-2" class="headerlink" title="参考页面"></a>参考页面</h3><p><a href="http://codeigniter.org.cn/user_guide/database/index.html" target="_blank" rel="noopener">http://codeigniter.org.cn/user_guide/database/index.html</a></p>
+<h2 id="上传类"><a href="#上传类" class="headerlink" title="上传类"></a>上传类</h2><p>CI的上传类会对上传后文件的原始文件名进行<code>sanitize_filename</code>处理，而<code>sanitize_filename</code>函数没有对windows下目录分隔符为<code>\</code>的情况进行处理，导致文件名即使经过<code>sanitize_filename</code>过滤，在windows下用<code>..\..</code>切换目录仍然可行。<br>即上传的文件原始文件名如果包含<code>..\..</code>则保存的文件可能逃逸当前目录。<br>但是实际测试发现，php会对上传后的文件名进行取<code>basename</code>的操作，导致不能出现<code>..\</code>。所以在此处并不能被利用。<br>php对此这样处理的原因是在IE浏览器中，上传文件会附带文件的全路径。根据php代码里的注释，取<code>basename</code>的操作可能在以后版本中取消。</p>
+<h3 id="参考页面-3"><a href="#参考页面-3" class="headerlink" title="参考页面"></a>参考页面</h3><p><a href="http://codeigniter.org.cn/user_guide/libraries/file_uploading.html" target="_blank" rel="noopener">http://codeigniter.org.cn/user_guide/libraries/file_uploading.html</a><br><a href="https://github.com/php/php-src/blob/6053987bc27e8dede37f437193a5cad448f99bce/main/rfc1867.c#L1156" target="_blank" rel="noopener">https://github.com/php/php-src/blob/6053987bc27e8dede37f437193a5cad448f99bce/main/rfc1867.c#L1156</a></p>
+<h2 id="杂七杂八"><a href="#杂七杂八" class="headerlink" title="杂七杂八"></a>杂七杂八</h2><p>CI框架提供了hook的功能。</p>
+<blockquote>
+<ul>
+<li><code>pre_system</code> 在系统执行的早期调用，这个时候只有 基准测试类 和 钩子类 被加载了， 还没有执行到路由或其他的流程。</li>
+<li><code>pre_controller</code> 在你的控制器调用之前执行，所有的基础类都已加载，路由和安全检查也已经完成。</li>
+<li><code>post_controller_constructor</code> 在你的控制器实例化之后立即执行，控制器的任何方法都还尚未调用。</li>
+<li><code>post_controller</code> 在你的控制器完全运行结束时执行。</li>
+<li><code>display_override</code> 覆盖 <code>_display()</code> 方法，该方法用于在系统执行结束时向浏览器发送最终的页面结果。 这可以让你有自己的显示页面的方法。注意你可能需要使用 $this-&gt;CI =&amp; get_instance() 方法来获取 CI 超级对象，以及使用 $this-&gt;CI-&gt;output-&gt;get_output() 方法来 获取最终的显示数据。</li>
+<li><code>cache_override</code> 使用你自己的方法来替代 输出类 中的 <code>_display_cache()</code> 方法，这让你有自己的缓存显示机制。</li>
+<li><code>post_system</code> 在最终的页面发送到浏览器之后、在系统的最后期被调用。</li>
+</ul>
+</blockquote>
+<p>在测试的时候做一些hook进行一些比较高级的操作。比如可以通过<code>display_override</code>来获取页面的输出，检测页面上可能出现的敏感的信息。</p>
+<h3 id="参考页面-4"><a href="#参考页面-4" class="headerlink" title="参考页面"></a>参考页面</h3><p><a href="http://codeigniter.org.cn/user_guide/general/hooks.html" target="_blank" rel="noopener">http://codeigniter.org.cn/user_guide/general/hooks.html</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>CI框架的代码整体看下来安全性较高，由于对用户的输入做了一些过滤，导致很多可能出现的问题难以被利用。<br>对于一些没有考虑到的问题，还希望能与大佬们交流。</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2016/12/CodeIgniter代码阅读笔记/" data-id="cjzj8jsyh001ugnpjupabd3iu" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2016/12/CodeIgniter代码阅读笔记/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2016/12/CodeIgniter代码阅读笔记/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2017/01/基于csv的信息泄露已死/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    基于csv的信息泄露已死
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2016/12/一个flash xss的利用/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">一个flash xss的利用</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2016/12/CodeIgniter代码阅读笔记/';
+        
+        this.page.identifier = 'CodeIgniter代码阅读笔记';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

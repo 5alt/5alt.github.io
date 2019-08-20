@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>chrome 浏览器扩展安全 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="去年8月份的时候fc老板带我搞了一波浏览器扩展的问题，屯了一些思路想批量扫描一下 chrome 扩展商店里的热门扩展，一直拖着没动，今天发现被大佬做了。 浏览器扩展的配置文件为manifest.json，里面规定了扩展的权限和一些其他的属性。其中比较常见且重要的属性有content_security_policy, permissions, content_scripts。content_secu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="chrome 浏览器扩展安全">
+<meta property="og:url" content="http://5alt.me/2018/02/浏览器扩展安全/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="去年8月份的时候fc老板带我搞了一波浏览器扩展的问题，屯了一些思路想批量扫描一下 chrome 扩展商店里的热门扩展，一直拖着没动，今天发现被大佬做了。 浏览器扩展的配置文件为manifest.json，里面规定了扩展的权限和一些其他的属性。其中比较常见且重要的属性有content_security_policy, permissions, content_scripts。content_secu">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.787Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="chrome 浏览器扩展安全">
+<meta name="twitter:description" content="去年8月份的时候fc老板带我搞了一波浏览器扩展的问题，屯了一些思路想批量扫描一下 chrome 扩展商店里的热门扩展，一直拖着没动，今天发现被大佬做了。 浏览器扩展的配置文件为manifest.json，里面规定了扩展的权限和一些其他的属性。其中比较常见且重要的属性有content_security_policy, permissions, content_scripts。content_secu">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-浏览器扩展安全" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            chrome 浏览器扩展安全
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2018/02/浏览器扩展安全/">
+            <time datetime="2018-02-26T16:00:00.000Z" itemprop="datePublished">2018-02-27</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>去年8月份的时候fc老板带我搞了一波浏览器扩展的问题，屯了一些思路想批量扫描一下 chrome 扩展商店里的热门扩展，一直拖着没动，今天发现被大佬做了。</p>
+<p>浏览器扩展的配置文件为<code>manifest.json</code>，里面规定了扩展的权限和一些其他的属性。其中比较常见且重要的属性有<code>content_security_policy</code>, <code>permissions</code>, <code>content_scripts</code>。<code>content_security_policy</code>指明了扩展所遵循的CSP规则，<code>permissions</code>代表扩展所拥有的访问权限，<code>content_scripts</code>则是会插入到页面中的脚本。<br><a id="more"></a></p>
+<h2 id="浏览器扩展的CSP"><a href="#浏览器扩展的CSP" class="headerlink" title="浏览器扩展的CSP"></a>浏览器扩展的CSP</h2><p>在chrome浏览器的文档里，默认的CSP是<code>script-src &#39;self&#39;; object-src &#39;self&#39;</code>。<br>而在某第三方浏览器中，扩展默认的CSP是<code>script-src &#39;self&#39; blob: filesystem: chrome-extension-resource:; object-src &#39;self&#39; blob: filesystem:;</code>。</p>
+<p>其中，<a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob" target="_blank" rel="noopener">blob协议</a>和<a href="https://developer.mozilla.org/en-US/docs/Web/API/FileSystem" target="_blank" rel="noopener">filesystem协议</a>只能用过JavaScript代码来创建。</p>
+<p>这意味着，在扩展里默认不能使用内联脚本，不能引用外部的js文件，不能动态类似eval那样执行js。同时我们也不能引入外部的swf文件通过flash来xss。<br>因此，即使在扩展里发现了dom类型的xss，也难以利用来完成攻击。即<code>innerHTML</code>或者<code>document.write</code>之类方法根本不需要去看，即使能利用成功插入任意内容也不能执行JavaScript代码。</p>
+<p>当然，在引用了一些有漏洞的库之后，还是存在被攻击的可能的。（ 如 <a href="http://5alt.me/2017/09/jQuery%E9%87%8C%E7%9A%84html()/">http://5alt.me/2017/09/jQuery%E9%87%8C%E7%9A%84html()/</a> ）</p>
+<h2 id="浏览器的-content-scripts"><a href="#浏览器的-content-scripts" class="headerlink" title="浏览器的 content_scripts"></a>浏览器的 content_scripts</h2><p><code>content_scripts</code>会在网页的上下文中运行，不过是在一个称为隔离环境的特殊环境中执行。它们可以访问所在页面的 DOM，但是不能访问当前页面创建的任何 JavaScript 变量或函数。在当前页面运行的 JavaScript 不能调用或访问任何内容脚本定义的函数或变量。<code>content_scripts</code>执行的域是当前页面所在的域，但是仍有部分特权。</p>
+<p>当然有的浏览器里并未对此做隔离，导致了扩展里调用的函数被页面中js劫持的情况。不过在不存在问题的情况下，很难对<code>content_scripts</code>做手脚，因此与之相关的<code>manifest.json</code>的配置项提到的文件以及<code>chrome.tabs.executeScript</code>函数都可以不必关心。</p>
+<p>有人可能存在疑问，像<code>tampermonkey</code>，它往页面注入js脚本，脚本中的变量可以被页面访问到，这不是违反了安全规则么。<code>tampermonkey</code>的做法是，先往页面中动态插一个script节点，执行完毕之后删除。这样在页面的DOM里不会发现注入的脚本，同时脚本也和当前页面在同一个执行环境里。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// page.js</span></span><br><span class="line">inject: <span class="function"><span class="keyword">function</span>(<span class="params">a</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> u = <span class="string">"text/xml"</span> == <span class="built_in">document</span>.contentType ? <span class="built_in">document</span>.createElementNS(<span class="string">"http://www.w3.org/1999/xhtml"</span>, <span class="string">"script"</span>) : <span class="built_in">document</span>.createElement(<span class="string">"script"</span>);</span><br><span class="line">        u.textContent = a;</span><br><span class="line">        (<span class="built_in">document</span>.head || <span class="built_in">document</span>.body || <span class="built_in">document</span>.documentElement || <span class="built_in">document</span>).appendChild(u);</span><br><span class="line">        u.parentNode.removeChild(u)</span><br></pre></td></tr></table></figure>
+<p>此外，根据nearg1e大佬的文章，</p>
+<blockquote>
+<ol>
+<li><p>background 并不是每次访问页面执行一次，内部定义的变量不会因为页面刷新而重新定义。</p>
+</li>
+<li><p>background 即使域改变也不会重新定义和赋值，所有的域都用一个 runtime。</p>
+</li>
+</ol>
+<p>第一点使得这个漏洞更加容易利用，第二点使得我们所写的 payload 并不只影响在 payload 中利用的网站，而是在浏览器和扩展为重启之前，每次访问新的页面都可以在不同域下触发 payload。</p>
+</blockquote>
+<h2 id="浏览器扩展的通信方式"><a href="#浏览器扩展的通信方式" class="headerlink" title="浏览器扩展的通信方式"></a>浏览器扩展的通信方式</h2><p>在浏览器中，页面与扩展通信、扩展之间通信、扩展内通信采用的是消息机制。扩展可以通过<code>chrome.runtime.onMessage</code>, <code>chrome.runtime.onMessageExternal</code>, <code>chrome.runtime.onConnect</code>, <code>chrome.runtime.onConnectExternal</code>监听消息事件并处理。其中<code>chrome.runtime.onMessage</code>和<code>chrome.runtime.onConnect</code>监听的是扩展内部消息传送，而<code>chrome.runtime.onMessageExternal</code>和<code>chrome.runtime.onConnectExternal</code>则是接收页面和其他扩展的消息。所以我们需要关注的是后面两个External的接口。</p>
+<p>接口的权限在<code>manifest.json</code>的<code>externally_connectable</code>中进行权限设置，但有的浏览器会在此之外自行添加可以发起通信的作用域。这里更多的会出现一些逻辑问题。（尤其是在CSP的影响下）</p>
+<p>除此之外，扩展还可以通过<code>window.addEventListener</code>的方式在原页面添加事件，如<code>message</code>事件，从页面获取事件消息。</p>
+<h2 id="浏览器的特权API"><a href="#浏览器的特权API" class="headerlink" title="浏览器的特权API"></a>浏览器的特权API</h2><p>很多人谈浏览器安全总是绕不过一个词叫做特权域。其实并不是因为这个域被列入了特权的白名单，而是有些特权的API只允许某些页面来调用。chrome源码里有几个<a href="https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/api/_features.md" target="_blank" rel="noopener"><code>_api_features.json</code></a>文件规定了一些API的调用来源范围。如果在某个有危险功能API所允许的域上发现了XSS，那么就会出现严重的安全问题。虽然有些API只允许某个域上的某些页面调用特权API，但是如果在这个域上的其他页面发现XSS也是可以进行攻击的，毕竟同域上没有页面之间隔离的说法。同理，如果特权API允许了http页面来调用，还会存在被中间人的风险。<br>所以寻找浏览器扩展方面的安全问题最好能知道浏览器存在哪些API，然后筛选出具有敏感操作的API，找出这些API允许调用的页面，然后寻找页面所在域的问题。<br>不过浏览器会存在一些默认的安全机制，阻止跨协议的跳转。即使有些页面存在 DOM 型的 XSS，但由于无法从http协议页面跳转过去，其被利用的可能性就会大大降低。</p>
+<p>附一个解析<code>_api_features.json</code>的<a href="/downloads/api_features.py">小脚本</a>。</p>
+<h2 id="浏览器扩展的攻击面"><a href="#浏览器扩展的攻击面" class="headerlink" title="浏览器扩展的攻击面"></a>浏览器扩展的攻击面</h2><p>从上面我们可以看到，在默认的情况下，即使一个扩展做的非常烂，由于浏览器默认的安全机制，也能保证该扩展自身大概率不受攻击。</p>
+<p>如果攻击者能控制允许发消息的页面能发起通信，那么需要找扩展的<code>chrome.runtime.onMessageExternal</code>和<code>chrome.runtime.onConnectExternal</code>事件，分析是否存在问题。<br>如果攻击者能在特权域找到一个XSS，就可以通过允许该页面允许的特权API做一些事情。<br>如果攻击者能中间人，可以尝试中间人特权域页面，或者寻找扩展中http的请求。<br>如果扩展将用户的数据<code>innerHTML</code>到扩展自身的页面显示，在CSP设置有问题的前提下，可以以扩展的权限执行代码。<br>如果扩展会在第三方页面上利用<code>innerHTML</code>方式插入一些代码并直接拼接了用户数据，则可能造成该页面的xss。<br>如果扩展将用户可控的内容以html的形式输出在页面上的话，需要注意是否会造成当前域以及其他域的xss。</p>
+<p>在实际的攻击利用场景中，寻找特权域xss的方式是比较常见的，但中间人造成的影响不容忽视。</p>
+<p>最后附一个静态分析 js 里关键字来辅助找扩展漏洞的<a href="/downloads/chrome_extension_static_analyzer.py">脚本</a>。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://content-security-policy.com/" target="_blank" rel="noopener">https://content-security-policy.com/</a><br><a href="https://developer.chrome.com/extensions/contentSecurityPolicy" target="_blank" rel="noopener">https://developer.chrome.com/extensions/contentSecurityPolicy</a><br><a href="https://developer.chrome.com/extensions/content_scripts" target="_blank" rel="noopener">https://developer.chrome.com/extensions/content_scripts</a><br><a href="https://developer.chrome.com/extensions/messaging" target="_blank" rel="noopener">https://developer.chrome.com/extensions/messaging</a><br><a href="https://crxdoc-zh.appspot.com/extensions/" target="_blank" rel="noopener">https://crxdoc-zh.appspot.com/extensions/</a><br><a href="https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/api/_features.md" target="_blank" rel="noopener">https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/api/_features.md</a><br><a href="http://blog.gclxry.com/chrome-extension-features/" target="_blank" rel="noopener">http://blog.gclxry.com/chrome-extension-features/</a><br><a href="https://www.anquanke.com/post/id/98917" target="_blank" rel="noopener">https://www.anquanke.com/post/id/98917</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2018/02/浏览器扩展安全/" data-id="cjzj8jsyx002lgnpjtwl8mmvy" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2018/02/浏览器扩展安全/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2018/02/浏览器扩展安全/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/04/利用恶意页面攻击本地Xdebug/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    利用恶意页面攻击本地Xdebug
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/01/子域名收集及端口扫描之ZeroScan/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">子域名收集及端口扫描之ZeroScan</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2018/02/浏览器扩展安全/';
+        
+        this.page.identifier = '浏览器扩展安全';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

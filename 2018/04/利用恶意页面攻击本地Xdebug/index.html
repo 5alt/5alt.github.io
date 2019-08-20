@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>利用恶意页面攻击本地Xdebug | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="TL;DRPHP开发者以及一些安全研究人员经常会在本地搭建一个基于Xdebug的PHP的调试服务，在大部分配置情况下，Xdebug采用HTTP请求头中的X-Forwarded-For字段作为DBGp协议的回连地址。受害者浏览攻击页面一段时间，攻击者可利用DNS Rebind技术向本地服务器发送带有恶意X-Forwarded-For的请求，即有可能在受害者电脑上执行任意代码。 前段时间看到VSCod">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用恶意页面攻击本地Xdebug">
+<meta property="og:url" content="http://5alt.me/2018/04/利用恶意页面攻击本地Xdebug/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="TL;DRPHP开发者以及一些安全研究人员经常会在本地搭建一个基于Xdebug的PHP的调试服务，在大部分配置情况下，Xdebug采用HTTP请求头中的X-Forwarded-For字段作为DBGp协议的回连地址。受害者浏览攻击页面一段时间，攻击者可利用DNS Rebind技术向本地服务器发送带有恶意X-Forwarded-For的请求，即有可能在受害者电脑上执行任意代码。 前段时间看到VSCod">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.787Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="利用恶意页面攻击本地Xdebug">
+<meta name="twitter:description" content="TL;DRPHP开发者以及一些安全研究人员经常会在本地搭建一个基于Xdebug的PHP的调试服务，在大部分配置情况下，Xdebug采用HTTP请求头中的X-Forwarded-For字段作为DBGp协议的回连地址。受害者浏览攻击页面一段时间，攻击者可利用DNS Rebind技术向本地服务器发送带有恶意X-Forwarded-For的请求，即有可能在受害者电脑上执行任意代码。 前段时间看到VSCod">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-利用恶意页面攻击本地Xdebug" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            利用恶意页面攻击本地Xdebug
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2018/04/利用恶意页面攻击本地Xdebug/">
+            <time datetime="2018-04-02T16:00:00.000Z" itemprop="datePublished">2018-04-03</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>TL;DR<br>PHP开发者以及一些安全研究人员经常会在本地搭建一个基于Xdebug的PHP的调试服务，在大部分配置情况下，Xdebug采用HTTP请求头中的<code>X-Forwarded-For</code>字段作为DBGp协议的回连地址。受害者浏览攻击页面一段时间，攻击者可利用DNS Rebind技术向本地服务器发送带有恶意<code>X-Forwarded-For</code>的请求，即有可能在受害者电脑上执行任意代码。</p>
+<p>前段时间看到VSCode修复了一个RCE的漏洞，讲的是VSCode在本地开放了一个Nodejs的调试端口，通过DNS Rebind的技术可以获取到调试用的WebSocket接口，即可执行任意代码实现RCE。这让我想起了PHP的调试工具Xdebug。<br><a id="more"></a><br>Xdebug是用于调试PHP的扩展，可以根据本地源码远程调试服务器上的PHP代码。很多开发者和安全研究人员通常会在本地搭建一套PHP的调试环境，用于日常的开发和调试。对于Xdebug的攻击，之前Ricter写了一篇文章介绍过。文章里提到了如果服务器开启了Xdebug的回连，并且攻击者能直接访问到服务器的话，可以直接造成RCE。</p>
+<p>但是大部分情况下，这些服务器处于内网环境中，有些甚至监听在<code>127.0.0.1</code>上，攻击者很难直接访问到，导致无法利用。如果把开发人员当做代理，利用CSRF来攻击位于内网的Xdebug呢？</p>
+<p>我们首先看一下Xdebug有关<a href="https://xdebug.org/docs/all_settings#remote_connect_back" target="_blank" rel="noopener">远程调试的文档</a>。<br>如果<code>xdebug.remote_connect_back</code>启用，<code>xdebug.remote_host</code>没有设置，Xdebug会主动连接发起HTTP请求的客户端。Xdebug会依次检测<code>$_SERVER[&#39;HTTP_X_FORWARDED_FOR&#39;]</code>、<code>$_SERVER[&#39;REMOTE_ADDR&#39;]</code>来决定回连的IP地址。</p>
+<p>即当Xdebug有类似如下的配置的时候，即有机会让Xdebug回连到请求头中<code>X-Forwarded-For</code>指向的ip地址。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">xdebug.remote_connect_back = 1</span><br><span class="line">xdebug.remote_enable = 1</span><br><span class="line">xdebug.remote_log =  /tmp/test.log</span><br></pre></td></tr></table></figure></p>
+<p>一般来讲，在PHP开发人员的本地环境中会有<code>index.php</code>和<code>config.php</code>等文件。在受害者访问攻击者的恶意页面时，攻击者可以让受害者在浏览器里尝试向本地url如<code>http://127.0.0.1/index.php?XDEBUG_SESSION_START</code>或者<code>http://127.0.0.1/config.php?XDEBUG_SESSION_START</code>发起HTTP请求，并带有指向攻击者服务器的<code>X-Forwarded-For</code>请求头。这样攻击者就能在自己的服务器上收到来自受害者的DBGp协议的连接，在受害者的电脑上执行任意PHP代码。</p>
+<p>我们都知道，在浏览器里发送带有非<a href="https://developer.mozilla.org/en-US/docs/Glossary/Simple_header" target="_blank" rel="noopener">simple header</a>的CORS请求的时候，需要先发送一个<a href="https://developer.mozilla.org/en-US/docs/Glossary/preflight_request" target="_blank" rel="noopener">preflight request</a>探测服务器是否允许发送这种请求头。此检测过程是由一个<code>OPTIONS</code>请求完成的。如果<code>OPTIONS</code>请求的响应头里有<code>Access-Control-Allow-Headers: X-Forwarded-For</code>这一项的话，才能发送带有<code>X-Forwarded-For</code>的GET或者POST请求。在受害者的本地环境中，几乎不会有这种响应头的。</p>
+<p>不过，攻击者可以采用DNS Rebind的方式来绕过这个限制。攻击者首先自己搭建一个DNS解析服务器，让自己控制的域名在发生第一次DNS解析的时候指向攻击者的服务器，以后都解析到<code>127.0.0.1</code>。这样当受害者访问攻击者的页面（<code>http://attacker-domain-with-dns-rebind/exp.html</code>）的时候，会从攻击者的服务器上拉取攻击代码，使浏览器循环向<code>http://attacker-domain-with-dns-rebind/index.php?XDEBUG_SESSION_START</code>发送带有恶意<code>X-Forwarded-For</code>头的请求。因为攻击者存放攻击代码的页面和触发Xdebug回连请求的url在同一个域内，即可不用发送前面所说的preflight request。</p>
+<p>由于DNS的解析结果也存在一定的缓存时间，在浏览器里大概需要1分钟的时间才会失效进行第二次解析。在发生第二次解析的时候，其指向的IP地址会变为<code>127.0.0.1</code>，即向受害者本地的服务器发送能触发Xdebug反弹的请求，这时候攻击者的服务器就能收到来自受害者Xdebug的连接了。攻击者可以通过DBGp协议中的eval命令在客户端执行任意php代码。</p>
+<p>我们认为漏洞的成因是Xdebug从<code>X-Forwarded-For</code>头中取IP作为回连地址，而<code>X-Forwarded-For</code>头是不可信的。</p>
+<p>我于2018年3月26日将此问题报告给PHP官方，PHP官方人员于2018年3月30日作出回应，不认为这是一个安全问题，并将报告转为bug使之处于公开状态。建议PHP开发人员和安全研究人员在Xdebug的配置文件中根据当前情况增加<code>xdebug.remote_host</code>配置项，来防止自己遭受此攻击。</p>
+<p>参考文献<br><a href="https://bugs.php.net/bug.php?id=76149" target="_blank" rel="noopener">https://bugs.php.net/bug.php?id=76149</a><br><a href="https://ricterz.me/posts/Xdebug%3A%20A%20Tiny%20Attack%20Surface" target="_blank" rel="noopener">https://ricterz.me/posts/Xdebug%3A%20A%20Tiny%20Attack%20Surface</a><br><a href="https://medium.com/0xcc/visual-studio-code-silently-fixed-a-remote-code-execution-vulnerability-8189e85b486b" target="_blank" rel="noopener">https://medium.com/0xcc/visual-studio-code-silently-fixed-a-remote-code-execution-vulnerability-8189e85b486b</a><br><a href="http://bluec0re.blogspot.ch/2018/03/cve-2018-7160-pwning-nodejs-developers.html" target="_blank" rel="noopener">http://bluec0re.blogspot.ch/2018/03/cve-2018-7160-pwning-nodejs-developers.html</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2018/04/利用恶意页面攻击本地Xdebug/" data-id="cjzj8jsyv002ggnpj7jy8aivu" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2018/04/利用恶意页面攻击本地Xdebug/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2018/04/利用恶意页面攻击本地Xdebug/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/04/业务逻辑中的session问题/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    业务逻辑中的session问题
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/02/浏览器扩展安全/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">chrome 浏览器扩展安全</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2018/04/利用恶意页面攻击本地Xdebug/';
+        
+        this.page.identifier = '利用恶意页面攻击本地Xdebug';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

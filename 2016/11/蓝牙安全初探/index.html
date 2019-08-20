@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>蓝牙安全初探 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="传统蓝牙设备的攻击蓝牙可能用来传输一些隐私的数据，有时候还需要在两个设备靠近时自动连接，因此引入了配对和绑定。 蓝牙配对模式Numeric Comparison：配对双方都显示一个6位的数字，由用户来核对数字是否一致，一致即可配对。例如手机之间的配对。Just Works：用于配对没有显示没有输入的设备，主动发起连接即可配对，用户看不到配对过程。例如连接蓝牙耳机。Passkey Entry：要求配">
+<meta property="og:type" content="article">
+<meta property="og:title" content="蓝牙安全初探">
+<meta property="og:url" content="http://5alt.me/2016/11/蓝牙安全初探/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="传统蓝牙设备的攻击蓝牙可能用来传输一些隐私的数据，有时候还需要在两个设备靠近时自动连接，因此引入了配对和绑定。 蓝牙配对模式Numeric Comparison：配对双方都显示一个6位的数字，由用户来核对数字是否一致，一致即可配对。例如手机之间的配对。Just Works：用于配对没有显示没有输入的设备，主动发起连接即可配对，用户看不到配对过程。例如连接蓝牙耳机。Passkey Entry：要求配">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.788Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="蓝牙安全初探">
+<meta name="twitter:description" content="传统蓝牙设备的攻击蓝牙可能用来传输一些隐私的数据，有时候还需要在两个设备靠近时自动连接，因此引入了配对和绑定。 蓝牙配对模式Numeric Comparison：配对双方都显示一个6位的数字，由用户来核对数字是否一致，一致即可配对。例如手机之间的配对。Just Works：用于配对没有显示没有输入的设备，主动发起连接即可配对，用户看不到配对过程。例如连接蓝牙耳机。Passkey Entry：要求配">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-蓝牙安全初探" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            蓝牙安全初探
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2016/11/蓝牙安全初探/">
+            <time datetime="2016-11-29T16:00:00.000Z" itemprop="datePublished">2016-11-30</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/radio/">radio</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="传统蓝牙设备的攻击"><a href="#传统蓝牙设备的攻击" class="headerlink" title="传统蓝牙设备的攻击"></a>传统蓝牙设备的攻击</h2><p>蓝牙可能用来传输一些隐私的数据，有时候还需要在两个设备靠近时自动连接，因此引入了配对和绑定。</p>
+<h3 id="蓝牙配对模式"><a href="#蓝牙配对模式" class="headerlink" title="蓝牙配对模式"></a>蓝牙配对模式</h3><p>Numeric Comparison：配对双方都显示一个6位的数字，由用户来核对数字是否一致，一致即可配对。例如手机之间的配对。<br>Just Works：用于配对没有显示没有输入的设备，主动发起连接即可配对，用户看不到配对过程。例如连接蓝牙耳机。<br>Passkey Entry：要求配对目标输入一个在本地设备上显示的6位数字，输入正确即可配对。例如连接蓝牙键盘。<br>Out of Band：两设备的通过别的途径交换配对信息，例如NFC等。例如一些NFC蓝牙音箱。<br><a id="more"></a><br>在老的蓝牙2.0协议中，配对过程需要输入一个PIN码，长度可以从4到16个数字。（很多设备默认0000或者1234）</p>
+<p>在配对的过程中通过PIN码来生成Linkkey。两个配对后的设备共享一个Linkkey，这个行为叫绑定。绑定之后下次两个设备接近后，用Linkkey进行认证，认证通过后生成EncryptionKey进行session的加密。认证的过程采用challenge-response的模式，以claimant and the verifier的方式来验证linkkey。认证完一方之后交换身份，再认证另一方。</p>
+<h3 id="攻击方式"><a href="#攻击方式" class="headerlink" title="攻击方式"></a>攻击方式</h3><p>由于设备绑定后通信是内容默认经过加密的，因此很难嗅探到敏感的信息。常用的攻击方式有如下几种。</p>
+<h4 id="嗅探配对过程获取PIN"><a href="#嗅探配对过程获取PIN" class="headerlink" title="嗅探配对过程获取PIN"></a>嗅探配对过程获取PIN</h4><p>配对的过程会用PIN生成随机数进行互相认证，而PIN只有很小的范围，可以通过爆破PIN来获取真正的PIN，以及通过中间计算的值得到Linkkey以及EncryptionKey，用于以后的配对和通信解密。<br>破解PIN用到的工具叫<a href="https://github.com/mikeryan/crackle/" target="_blank" rel="noopener">crackle</a>。</p>
+<h4 id="重放攻击"><a href="#重放攻击" class="headerlink" title="重放攻击"></a>重放攻击</h4><p>蓝牙没有时间戳，可以重放流量。对于蓝牙键盘通过频率可以大致猜测流量对应什么按键。当然也可以实施其他攻击。</p>
+<h4 id="在获取Linkkey前提下模拟设备"><a href="#在获取Linkkey前提下模拟设备" class="headerlink" title="在获取Linkkey前提下模拟设备"></a>在获取Linkkey前提下模拟设备</h4><p>如果能获取到Linkkey，则可以更改蓝牙mac地址模拟成一方的设备，与另一方连接。如果模拟成设备与手机连接，能获取到通话记录，说不定还能获取到整个通讯录。</p>
+<h5 id="linkkey位置"><a href="#linkkey位置" class="headerlink" title="linkkey位置"></a>linkkey位置</h5><p>注意在有的平台上linkkey显示是反的</p>
+<h6 id="安卓"><a href="#安卓" class="headerlink" title="安卓"></a>安卓</h6><p>/data/misc/bluetoothd/XX:XX:XX:XX:XX:XX/linkkeys<br>/date/misc/bluedroid/bt_config.xml</p>
+<h5 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h5><p>psexec -s -i regedit.exe<br>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters\Keys</p>
+<h5 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h5><p>/var/lib/Bluetooth/[BD_ADDR]/linkkeys<br>其他文件可以参考<a href="http://manpages.ubuntu.com/manpages/precise/man8/bluetoothd.8.html" target="_blank" rel="noopener">http://manpages.ubuntu.com/manpages/precise/man8/bluetoothd.8.html</a></p>
+<h5 id="osx"><a href="#osx" class="headerlink" title="osx"></a>osx</h5><p>sudo defaults read /private/var/root/Library/Preferences/blued.plist</p>
+<h4 id="其他攻击"><a href="#其他攻击" class="headerlink" title="其他攻击"></a>其他攻击</h4><p>其他攻击如蓝牙中间人、mac地址爆破、PIN爆破等暂时不提及。<br>蓝牙中间人可参考<a href="https://github.com/securing/gattacker" target="_blank" rel="noopener">https://github.com/securing/gattacker</a> 和 <a href="https://github.com/DigitalSecurity/btlejuice" target="_blank" rel="noopener">https://github.com/DigitalSecurity/btlejuice</a></p>
+<h2 id="BLE设备GATT协议的攻击"><a href="#BLE设备GATT协议的攻击" class="headerlink" title="BLE设备GATT协议的攻击"></a>BLE设备GATT协议的攻击</h2><p>GATT协议可以在蓝牙设备不完成配对的情况下进行访问，因此，通信流量明文传输，如果应用层没有加密或者校验，则可以被轻易地嗅探和伪造数据。</p>
+<p>GATT中一般有多个Service，一个Service中有多个Characteristic。Service和Characteristic都有一个唯一的UUID。一般一个Service对应一个功能，蓝牙标准里预先定义了一些UUID用作固定的用途，比如电量、心率等。Characteristic相当于Service的一个项，有read、write、indicate、notify几种属性，可以对这项的值进行读写和通知的功能。厂商也可能实现一些私有的Service，用私有的协议进行通信。如果这些通信协议没有加密或者校验，则很有可能受到攻击。</p>
+<p>蓝牙嗅探我用的是NRF51822，不过只支持windows平台，只支持BLE。该方案被动嗅探数据包，为了防止丢包，需要在不busy的USB bus上，并避免在虚拟机里使用。</p>
+<p>当然，攻击蓝牙设备是一方面，还可以伪造成蓝牙设备来对客户端做一些欺骗。比如可以用一个usb蓝牙接收器伪装成一个蓝牙运动手环，来欺骗微信运动。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://linuxtoy.org/archives/ubuntu-bluetooth-guide.html" target="_blank" rel="noopener">https://linuxtoy.org/archives/ubuntu-bluetooth-guide.html</a><br><a href="http://www.race604.com/gatt-profile-intro/" target="_blank" rel="noopener">http://www.race604.com/gatt-profile-intro/</a><br><a href="https://www.bluetooth.com/specifications/generic-attributes-overview" target="_blank" rel="noopener">https://www.bluetooth.com/specifications/generic-attributes-overview</a><br><a href="http://www.tuicool.com/articles/ayaYfmU" target="_blank" rel="noopener">http://www.tuicool.com/articles/ayaYfmU</a><br><a href="https://github.com/adafruit/Adafruit_BLESniffer_Python" target="_blank" rel="noopener">https://github.com/adafruit/Adafruit_BLESniffer_Python</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2016/11/蓝牙安全初探/" data-id="cjzj8jsz2002qgnpjogb9kfoe" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2016/11/蓝牙安全初探/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2016/11/蓝牙安全初探/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2016/12/利用蓝牙模拟手环伪造微信运动步数/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    利用蓝牙模拟手环伪造微信运动步数
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2016/11/搭建简单的SmtpServer/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">搭建简单的Smtp Server</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2016/11/蓝牙安全初探/';
+        
+        this.page.identifier = '蓝牙安全初探';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

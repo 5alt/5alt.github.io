@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>安卓 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="安卓刷机购机指北https://twrp.me/Devices/ 安卓抓包tcpdumphttp://www.androidtcpdump.com/./tcpdump -i any -p -s 0 -w /sdcard/capture.pcap 解决 burp 证书问题 https://github.com/Magisk-Modules-Repo/movecertAndroid 7.0 Nouga">
+<meta property="og:type" content="website">
+<meta property="og:title" content="安卓">
+<meta property="og:url" content="http://5alt.me/wiki/Android.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="安卓刷机购机指北https://twrp.me/Devices/ 安卓抓包tcpdumphttp://www.androidtcpdump.com/./tcpdump -i any -p -s 0 -w /sdcard/capture.pcap 解决 burp 证书问题 https://github.com/Magisk-Modules-Repo/movecertAndroid 7.0 Nouga">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.940Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="安卓">
+<meta name="twitter:description" content="安卓刷机购机指北https://twrp.me/Devices/ 安卓抓包tcpdumphttp://www.androidtcpdump.com/./tcpdump -i any -p -s 0 -w /sdcard/capture.pcap 解决 burp 证书问题 https://github.com/Magisk-Modules-Repo/movecertAndroid 7.0 Nouga">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="page-undefined" class="article article-type-page" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            安卓
+        </h1>
+    
+
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="安卓刷机购机指北"><a href="#安卓刷机购机指北" class="headerlink" title="安卓刷机购机指北"></a>安卓刷机购机指北</h2><p><a href="https://twrp.me/Devices/" target="_blank" rel="noopener">https://twrp.me/Devices/</a></p>
+<h2 id="安卓抓包"><a href="#安卓抓包" class="headerlink" title="安卓抓包"></a>安卓抓包</h2><p>tcpdump<br><a href="http://www.androidtcpdump.com/" target="_blank" rel="noopener">http://www.androidtcpdump.com/</a><br>./tcpdump -i any -p -s 0 -w /sdcard/capture.pcap</p>
+<p>解决 burp 证书问题 <a href="https://github.com/Magisk-Modules-Repo/movecert" target="_blank" rel="noopener">https://github.com/Magisk-Modules-Repo/movecert</a><br>Android 7.0 Nougat 之后，不再信任用户空间装的证书，需要移动到系统目录<code>/system/etc/security/cacerts</code>。系统目录里是 PEM 格式的证书，而 burp 导出是 DER 格式的。<br>对某些手机，burp 生成的证书会有问题，需要在 burp 前套一个其他的代理。</p>
+<p>用户安装的证书有效期不能太久。<br><a href="https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018" target="_blank" rel="noopener">https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018</a></p>
+<h2 id="adb-强制安装"><a href="#adb-强制安装" class="headerlink" title="adb 强制安装"></a>adb 强制安装</h2><p>adb install -r wx.apk</p>
+<h2 id="frida"><a href="#frida" class="headerlink" title="frida"></a>frida</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">adb push frida-server /data/local/tmp/</span><br><span class="line">adb shell</span><br><span class="line">su</span><br><span class="line">cd /data/local/tmp/</span><br><span class="line">chmod 777 frida-server</span><br><span class="line">setenforce 0</span><br><span class="line">./frida-server &amp;</span><br><span class="line">adb forward tcp:27042 tcp:27042</span><br></pre></td></tr></table></figure>
+<p>syscalls <a href="https://github.com/dpnishant/appmon" target="_blank" rel="noopener">https://github.com/dpnishant/appmon</a></p>
+<h3 id="提示-sudo-sysctl-kernel-yama-ptrace-scope-0"><a href="#提示-sudo-sysctl-kernel-yama-ptrace-scope-0" class="headerlink" title="提示 sudo sysctl kernel.yama.ptrace_scope=0"></a>提示 <code>sudo sysctl kernel.yama.ptrace_scope=0</code></h3><p>This could also be <a href="https://github.com/frida/frida/issues/824#issuecomment-479664290" target="_blank" rel="noopener">due to Magisk Hide</a>. Try disabling it and rebooting before running your command.</p>
+<p><a href="https://github.com/ceres-c/frida-website/blob/41c04f558e918fcbbc95fa7986fadb58dd56503a/_docs/troubleshooting.md" target="_blank" rel="noopener">https://github.com/ceres-c/frida-website/blob/41c04f558e918fcbbc95fa7986fadb58dd56503a/_docs/troubleshooting.md</a></p>
+<h3 id="frida-脚本"><a href="#frida-脚本" class="headerlink" title="frida 脚本"></a>frida 脚本</h3><p><a href="https://codeshare.frida.re/browse" target="_blank" rel="noopener">https://codeshare.frida.re/browse</a><br><a href="https://github.com/Nightbringer21/fridump" target="_blank" rel="noopener">https://github.com/Nightbringer21/fridump</a><br><a href="https://github.com/lyxhh/lxhToolHTTPDecrypt" target="_blank" rel="noopener">https://github.com/lyxhh/lxhToolHTTPDecrypt</a><br><a href="https://github.com/iddoeldor/frida-snippets" target="_blank" rel="noopener">https://github.com/iddoeldor/frida-snippets</a><br><a href="https://github.com/sensepost/objection" target="_blank" rel="noopener">https://github.com/sensepost/objection</a></p>
+<h3 id="js-api"><a href="#js-api" class="headerlink" title="js api"></a>js api</h3><p>函数重载和构造函数<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> sclass = Java.use(<span class="string">"xxx.class"</span>);</span><br><span class="line">sclass.$<span class="keyword">new</span>.overload(<span class="string">'java.lang.String'</span>, <span class="string">'int'</span>).implementation = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br></pre></td></tr></table></figure></p>
+<p>Hashmap构造和类型转换<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> HashMap = Java.use(<span class="string">"java.util.HashMap"</span>);</span><br><span class="line"><span class="keyword">var</span> <span class="built_in">Map</span> = Java.use(<span class="string">"java.util.Map"</span>);</span><br><span class="line"></span><br><span class="line">hashmap = HashMap.$<span class="keyword">new</span>()</span><br><span class="line"><span class="keyword">var</span> map = Java.cast(hashmap, <span class="built_in">Map</span>);</span><br><span class="line">map.put(<span class="string">"a"</span>, <span class="string">"1"</span>);</span><br><span class="line">map.put(<span class="string">"b"</span>, <span class="string">"2"</span>);</span><br></pre></td></tr></table></figure></p>
+<h3 id="docs"><a href="#docs" class="headerlink" title="docs"></a>docs</h3><p><a href="https://pypkg.com/pypi/frida/api/" target="_blank" rel="noopener">https://pypkg.com/pypi/frida/api/</a><br><a href="https://github.com/frida/frida-java/blob/master/index.js" target="_blank" rel="noopener">https://github.com/frida/frida-java/blob/master/index.js</a><br><a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.2" target="_blank" rel="noopener">https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.2</a></p>
+<h2 id="安卓命令"><a href="#安卓命令" class="headerlink" title="安卓命令"></a>安卓命令</h2><h3 id="查看窗口栈"><a href="#查看窗口栈" class="headerlink" title="查看窗口栈"></a>查看窗口栈</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">adb shell</span><br><span class="line">dumpsys window</span><br></pre></td></tr></table></figure>
+<h3 id="查看窗口的activity"><a href="#查看窗口的activity" class="headerlink" title="查看窗口的activity"></a>查看窗口的activity</h3><p><code>dumpsys activity top</code></p>
+<h3 id="调起activity"><a href="#调起activity" class="headerlink" title="调起activity"></a>调起activity</h3><p><code>am start -n 包名/activity名 参数</code></p>
+<p>有的activity可能需要flags<br><a href="http://gityuan.com/2016/02/27/am-command/" target="_blank" rel="noopener">http://gityuan.com/2016/02/27/am-command/</a></p>
+<h2 id="xposed"><a href="#xposed" class="headerlink" title="xposed"></a>xposed</h2><p><a href="https://github.com/ac-pm/Inspeckage" target="_blank" rel="noopener">https://github.com/ac-pm/Inspeckage</a><br>开启debug <a href="https://github.com/pylerSM/XInstaller" target="_blank" rel="noopener">https://github.com/pylerSM/XInstaller</a><br>修改硬件信息 <a href="https://github.com/1998lixin/Hardwarecode" target="_blank" rel="noopener">https://github.com/1998lixin/Hardwarecode</a><br>ssl pinning <a href="https://github.com/Fuzion24/JustTrustMe" target="_blank" rel="noopener">https://github.com/Fuzion24/JustTrustMe</a></p>
+<h2 id="脱壳"><a href="#脱壳" class="headerlink" title="脱壳"></a>脱壳</h2><p>patch 安卓模拟器源码进行脱壳 <a href="https://github.com/CheckPointSW/android_unpacker" target="_blank" rel="noopener">https://github.com/CheckPointSW/android_unpacker</a><br>dex逆向辅助（Dalvik） <a href="https://github.com/CalebFenton/dex-oracle" target="_blank" rel="noopener">https://github.com/CalebFenton/dex-oracle</a><br>安卓反混淆辅助 <a href="https://github.com/CalebFenton/simplify" target="_blank" rel="noopener">https://github.com/CalebFenton/simplify</a><br><a href="https://github.com/WrBug/dumpDex" target="_blank" rel="noopener">https://github.com/WrBug/dumpDex</a></p>
+<h2 id="抓包解密"><a href="#抓包解密" class="headerlink" title="抓包解密"></a>抓包解密</h2><p><a href="https://github.com/federicodotta/Brida/" target="_blank" rel="noopener">https://github.com/federicodotta/Brida/</a><br><a href="http://bobao.360.cn/learning/detail/4209.html" target="_blank" rel="noopener">http://bobao.360.cn/learning/detail/4209.html</a></p>
+<h2 id="so-逆向辅助"><a href="#so-逆向辅助" class="headerlink" title="so 逆向辅助"></a>so 逆向辅助</h2><p><a href="https://github.com/feicong/jni_helper" target="_blank" rel="noopener">https://github.com/feicong/jni_helper</a><br>根据.dynamic修复 section table  <a href="https://github.com/freakishfox/xAnSo" target="_blank" rel="noopener">https://github.com/freakishfox/xAnSo</a> (<a href="https://bbs.pediy.com/thread-221741.htm" target="_blank" rel="noopener">https://bbs.pediy.com/thread-221741.htm</a>)</p>
+<h2 id="jadx"><a href="#jadx" class="headerlink" title="jadx"></a>jadx</h2><p>因为Jadx打开apk文件会解析资源文件，如果一个app有很多资源文件，那么Jadx打开就会卡死，所以很多同学问我为什么Jadx打开apk文件就出现卡死状态，主要是因为解析资源文件导致的。所以为了防止卡死，直接解压出dex文件，然后打开就不会卡死了。</p>
+<h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><p>安卓shell <a href="https://termux.com/" target="_blank" rel="noopener">https://termux.com/</a><br>adb下载 <a href="https://developer.android.com/studio/releases/platform-tools.html" target="_blank" rel="noopener">https://developer.android.com/studio/releases/platform-tools.html</a><br>源码静态分析（可能可以改造） <a href="https://github.com/blackarbiter/Android_Code_Arbiter" target="_blank" rel="noopener">https://github.com/blackarbiter/Android_Code_Arbiter</a>  (<a href="https://tech.meituan.com/Android-Code-Arbiter.html" target="_blank" rel="noopener">https://tech.meituan.com/Android-Code-Arbiter.html</a>)<br>Android SDK <a href="https://developer.android.com/studio/index.html?hl=zh-cn" target="_blank" rel="noopener">https://developer.android.com/studio/index.html?hl=zh-cn</a><br>busybox <a href="https://busybox.net/downloads/binaries/" target="_blank" rel="noopener">https://busybox.net/downloads/binaries/</a><br>过<code>PackageManager.getPackageInfo().signature</code>方式签名验证 <a href="https://github.com/L-JINBIN/ApkSignatureKiller" target="_blank" rel="noopener">https://github.com/L-JINBIN/ApkSignatureKiller</a><br>apk自身安全drozer <a href="https://github.com/mwrlabs/drozer" target="_blank" rel="noopener">https://github.com/mwrlabs/drozer</a><br>jadx <a href="https://github.com/skylot/jadx" target="_blank" rel="noopener">https://github.com/skylot/jadx</a><br>GDA(windows) <a href="http://www.gda.wiki:9090/" target="_blank" rel="noopener">http://www.gda.wiki:9090/</a><br><a href="https://github.com/MobSF/Mobile-Security-Framework-MobSF" target="_blank" rel="noopener">https://github.com/MobSF/Mobile-Security-Framework-MobSF</a></p>
+<h2 id="安卓-exploits"><a href="#安卓-exploits" class="headerlink" title="安卓 exploits"></a>安卓 exploits</h2><p><a href="https://github.com/ele7enxxh/poc-exp" target="_blank" rel="noopener">https://github.com/ele7enxxh/poc-exp</a><br><a href="https://github.com/ScottyBauer/Android_Kernel_CVE_POCs" target="_blank" rel="noopener">https://github.com/ScottyBauer/Android_Kernel_CVE_POCs</a></p>
+<h2 id="免-root-hook"><a href="#免-root-hook" class="headerlink" title="免 root hook"></a>免 root hook</h2><p><a href="https://github.com/android-hacker/VirtualXposed" target="_blank" rel="noopener">https://github.com/android-hacker/VirtualXposed</a></p>
+<h2 id="Genymotion"><a href="#Genymotion" class="headerlink" title="Genymotion"></a>Genymotion</h2><h3 id="Google-Apps"><a href="#Google-Apps" class="headerlink" title="Google Apps"></a>Google Apps</h3><p><a href="http://opengapps.org/" target="_blank" rel="noopener">http://opengapps.org/</a><br><a href="https://github.com/opengapps/opengapps" target="_blank" rel="noopener">https://github.com/opengapps/opengapps</a></p>
+<h3 id="ARM-Translation"><a href="#ARM-Translation" class="headerlink" title="ARM_Translation"></a>ARM_Translation</h3><p><a href="https://forum.xda-developers.com/showthread.php?t=2528952" target="_blank" rel="noopener">https://forum.xda-developers.com/showthread.php?t=2528952</a></p>
+<h3 id="adb"><a href="#adb" class="headerlink" title="adb"></a>adb</h3><p>在设置里指定adb的path，或者用自带的adb</p>
+<h2 id="安卓学习"><a href="#安卓学习" class="headerlink" title="安卓学习"></a>安卓学习</h2><p><a href="https://github.com/iwannabetop/Awesome-Android-Learning-Guide" target="_blank" rel="noopener">https://github.com/iwannabetop/Awesome-Android-Learning-Guide</a><br><a href="https://github.com/OWASP/owasp-mstg" target="_blank" rel="noopener">https://github.com/OWASP/owasp-mstg</a></p>
+<h2 id="装机软件"><a href="#装机软件" class="headerlink" title="装机软件"></a>装机软件</h2><p>黑域 <a href="https://piebridge.me/br/" target="_blank" rel="noopener">https://piebridge.me/br/</a><br>原生相机 <a href="https://www.celsoazevedo.com/files/android/google-camera/" target="_blank" rel="noopener">https://www.celsoazevedo.com/files/android/google-camera/</a><br>流量控制 <a href="https://github.com/ukanth/afwall" target="_blank" rel="noopener">https://github.com/ukanth/afwall</a><br>XPrivacy <a href="https://github.com/M66B/XPrivacyLua" target="_blank" rel="noopener">https://github.com/M66B/XPrivacyLua</a><br>谷歌框架 <a href="http://opengapps.org/" target="_blank" rel="noopener">http://opengapps.org/</a><br>绿色守护 <a href="https://forum.xda-developers.com/showthread.php?t=2155737" target="_blank" rel="noopener">https://forum.xda-developers.com/showthread.php?t=2155737</a><br>代理切换 <a href="https://play.google.com/store/apps/details?id=org.proxydroid" target="_blank" rel="noopener">https://play.google.com/store/apps/details?id=org.proxydroid</a><br>root 管理 <a href="https://forum.xda-developers.com/apps/magisk" target="_blank" rel="noopener">https://forum.xda-developers.com/apps/magisk</a><br>ProxyDroid <a href="https://github.com/madeye/proxydroid" target="_blank" rel="noopener">https://github.com/madeye/proxydroid</a><br>AdBlocker</p>
+<h2 id="刷机"><a href="#刷机" class="headerlink" title="刷机"></a>刷机</h2><p>On your device, go into Settings -&gt; About and find the Build Number and tap on it 7 times to enable developer settings. Press back and go into Developer Options and enable USB debugging. From your computer, open a command prompt and type:</p>
+<p><code>adb reboot bootloader</code></p>
+<p>You should now be in fastboot mode.</p>
+<p>Your device needs to be unlocked before it can flash custom images. To unlock your device type:</p>
+<p><code>fastboot oem unlock</code></p>
+<p>Download the correct image file and copy the file into the same folder as your adb and fastboot binaries. Rename the image to twrp.img and type:</p>
+<p>进入临时的 twrp: <code>fastboot boot twrp.img</code></p>
+<p>然后用临时的 twrp 刷入 twrp 的 zip 包。</p>
+<p><code>adb reboot recovery</code></p>
+<p>在 recovery 里选择 <code>adb sideload</code>刷机模式。</p>
+<h2 id="直接下载-Google-play-软件"><a href="#直接下载-Google-play-软件" class="headerlink" title="直接下载 Google play 软件"></a>直接下载 Google play 软件</h2><p><a href="https://apps.evozi.com/apk-downloader/" target="_blank" rel="noopener">https://apps.evozi.com/apk-downloader/</a></p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>mount -o rw,remount /system</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/wiki/Android.html" data-id="cjzj8jsya0015gnpj6fgujfus" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/wiki/Android.html#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/wiki/Android.html">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/wiki/Android.html';
+        
+        this.page.identifier = 'undefined';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

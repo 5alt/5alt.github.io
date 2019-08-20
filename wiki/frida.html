@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>frida | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="nativehook arm 函数可能需要加一也可能不要123456Interceptor.attach(address.add(1), &amp;#123;    onEnter: function (args) &amp;#123;    &amp;#125;,    onLeave: function (retval) &amp;#123;    &amp;#125;&amp;#125;); 根据arm spec, 跳转地址最低位( ls">
+<meta property="og:type" content="website">
+<meta property="og:title" content="frida">
+<meta property="og:url" content="http://5alt.me/wiki/frida.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="nativehook arm 函数可能需要加一也可能不要123456Interceptor.attach(address.add(1), &amp;#123;    onEnter: function (args) &amp;#123;    &amp;#125;,    onLeave: function (retval) &amp;#123;    &amp;#125;&amp;#125;); 根据arm spec, 跳转地址最低位( ls">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.940Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="frida">
+<meta name="twitter:description" content="nativehook arm 函数可能需要加一也可能不要123456Interceptor.attach(address.add(1), &amp;#123;    onEnter: function (args) &amp;#123;    &amp;#125;,    onLeave: function (retval) &amp;#123;    &amp;#125;&amp;#125;); 根据arm spec, 跳转地址最低位( ls">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="page-undefined" class="article article-type-page" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            frida
+        </h1>
+    
+
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="native"><a href="#native" class="headerlink" title="native"></a>native</h2><h3 id="hook-arm-函数可能需要加一也可能不要"><a href="#hook-arm-函数可能需要加一也可能不要" class="headerlink" title="hook arm 函数可能需要加一也可能不要"></a>hook arm 函数可能需要加一也可能不要</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Interceptor.attach(address.add(<span class="number">1</span>), &#123;</span><br><span class="line">    onEnter: <span class="function"><span class="keyword">function</span> (<span class="params">args</span>) </span>&#123;</span><br><span class="line">    &#125;,</span><br><span class="line">    onLeave: <span class="function"><span class="keyword">function</span> (<span class="params">retval</span>) </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>根据arm spec, 跳转地址最低位( lsb ) 为0表示 arm 指令；最低位为1表示thumb指令。Thumb 可以看作是 ARM 指令集压缩形式的子集，是针对指令长度问题而提出的，它具有 16 位的指令长度（ARM：32 位），但操作数、指令地址这两项 Thumb 均和 ARM 相同，为 32 位，所以如果想要区分当前指令是 ARM 还是 Thumb 通过指令长度就可以知道。</p>
+<h3 id="自己写-so-加载进去"><a href="#自己写-so-加载进去" class="headerlink" title="自己写 so 加载进去"></a>自己写 so 加载进去</h3><h4 id="Making-a-dylib"><a href="#Making-a-dylib" class="headerlink" title="Making a dylib"></a>Making a dylib</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span> &#123;</span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span> *<span class="title">toUTF8Ref</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span> &amp;str)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> str.c_str();</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Loading-the-lib"><a href="#Loading-the-lib" class="headerlink" title="Loading the lib"></a>Loading the lib</h4><p>c 中的用法<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//const RTLD_LAZY = 1;</span></span><br><span class="line"><span class="keyword">void</span> *handle = dlopen(<span class="string">"/path/to/getstr_dl.dylib"</span>, RTLD_LAZY); <span class="comment">// or RTLD_NOW, doesn't really matter here</span></span><br><span class="line"><span class="keyword">void</span> *toUTF8Ref_ptr = dlsym(handle, <span class="string">"toUTF8Ref"</span>);</span><br><span class="line"><span class="comment">/* use toUTF8Ref_ptr */</span></span><br><span class="line">dlclose(handle);</span><br></pre></td></tr></table></figure></p>
+<p>对应到 frida<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> dlopen = <span class="keyword">new</span> NativeFunction(Module.findExportByName(<span class="literal">null</span>, <span class="string">'dlopen'</span>), <span class="string">'pointer'</span>, [<span class="string">'pointer'</span>, <span class="string">'int'</span>])</span><br><span class="line"><span class="keyword">const</span> dlsym = <span class="keyword">new</span> NativeFunction(Module.findExportByName(<span class="literal">null</span>, <span class="string">'dlsym'</span>), <span class="string">'pointer'</span>, [<span class="string">'pointer'</span>, <span class="string">'pointer'</span>])</span><br><span class="line"><span class="comment">// var handle = dlopen("/path/to/getstr_dl.dylib", 1);</span></span><br><span class="line"><span class="comment">// We have to alloc all the strings in process memory first, we can’t pass JS strings to NativeFunction!</span></span><br><span class="line"><span class="keyword">var</span> path = Memory.allocUtf8String(<span class="string">"/path/to/getstr_dl.dylib"</span>);</span><br><span class="line"><span class="keyword">var</span> symb = Memory.allocUtf8String(<span class="string">"toUTF8Ref"</span>);</span><br><span class="line"><span class="keyword">var</span> handle = dlopen(path, <span class="number">1</span>);</span><br><span class="line"><span class="keyword">var</span> toUTF8Ref_ptr = dlsym(handle, symb);</span><br><span class="line"><span class="keyword">var</span> toUTF8Ref = <span class="keyword">new</span> NativeFunction(toUTF8Ref_ptr, <span class="string">'pointer'</span>, [<span class="string">'pointer'</span>]);</span><br></pre></td></tr></table></figure></p>
+<h4 id="Using-the-lib"><a href="#Using-the-lib" class="headerlink" title="Using the lib"></a>Using the lib</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Interceptor.attach(ptr(<span class="string">"0x103e2c3d0"</span>), <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(Memory.readUtf8String(</span><br><span class="line">		toUTF8Ref(<span class="keyword">this</span>.context.rdi)</span><br><span class="line">	)); </span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p><a href="https://stek29.rocks/2017/08/07/frida-stdstring.html" target="_blank" rel="noopener">https://stek29.rocks/2017/08/07/frida-stdstring.html</a></p>
+<h3 id="java-中加载-so"><a href="#java-中加载-so" class="headerlink" title="java 中加载 so"></a>java 中加载 so</h3><p>用 System.load / System.loadlibrary，注意自己编译的 so 不能放在<code>/sdcard</code>目录下，安卓目录存在权限问题，最好放应用目录下<code>/data/user/0/com.tencent.wework/lib/</code>！so 的权限要设置好，可以 <code>chmod 777</code>。加载 so 的时候要版本对应。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> System = Java.use(<span class="string">'java.lang.System'</span>);</span><br><span class="line">     System.load.implementation = <span class="function"><span class="keyword">function</span>(<span class="params">library</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> ret = <span class="keyword">this</span>.load(library)</span><br><span class="line"></span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'System.load("'</span> + library + <span class="string">'")'</span>);</span><br><span class="line">            <span class="keyword">this</span>.load(<span class="string">"/data/user/0/com.tencent.wework/lib/libprotobuf-cpp-full.so"</span>)</span><br><span class="line">            <span class="keyword">var</span> membase = Module.findBaseAddress(<span class="string">'libprotobuf-cpp-full.so'</span>);</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'libprotobuf.so'</span>, membase)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.loadLibrary(<span class="string">"stdc++"</span>)</span><br><span class="line">            <span class="keyword">var</span> membase = Module.findBaseAddress(<span class="string">'libstdc++.so'</span>);</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'stdc++'</span>, membase)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> ret</span><br><span class="line">            &#125;</span><br><span class="line">    <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(e);</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> System = Java.use(<span class="string">'java.lang.System'</span>);</span><br><span class="line">    <span class="keyword">const</span> Runtime = Java.use(<span class="string">'java.lang.Runtime'</span>);</span><br><span class="line">    <span class="keyword">const</span> SystemLoad_2 = System.loadLibrary.overload(<span class="string">'java.lang.String'</span>);</span><br><span class="line">    <span class="keyword">const</span> VMStack = Java.use(<span class="string">'dalvik.system.VMStack'</span>);</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        <span class="keyword">const</span> loaded = Runtime.getRuntime().load(<span class="string">"/data/user/0/com.tencent.wework/lib/libnative-lib.so"</span>, VMStack.getCallingClassLoader());</span><br><span class="line">        <span class="keyword">var</span> membase = Module.findBaseAddress(<span class="string">'libnative-lib.so'</span>);</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'libnative-lib.so'</span>, membase)</span><br><span class="line">        <span class="built_in">console</span>.log(Module.findExportByName(<span class="string">'libnative-lib.so'</span>, <span class="string">'_Z13getStringDumpPv'</span>))</span><br><span class="line"></span><br><span class="line">    &#125;<span class="keyword">catch</span>(e)&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(e)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>attach 的话需要找到 classLoader<br><a href="https://github.com/frida/frida-java/issues/63#issuecomment-384629231" target="_blank" rel="noopener">https://github.com/frida/frida-java/issues/63#issuecomment-384629231</a></p>
+<h3 id="通过-this-指针找类名"><a href="#通过-this-指针找类名" class="headerlink" title="通过 this 指针找类名"></a>通过 this 指针找类名</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var pSize = Process.pointerSize;</span><br><span class="line">var class_name = args[0].readPointer().sub(pSize).readPointer().add(pSize).readPointer().readCString()</span><br></pre></td></tr></table></figure>
+<h3 id="调用栈"><a href="#调用栈" class="headerlink" title="调用栈"></a>调用栈</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> trace = Thread.backtrace(<span class="keyword">this</span>.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress);</span><br><span class="line"><span class="built_in">console</span>.log(name + <span class="string">': '</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> j <span class="keyword">in</span> trace) <span class="built_in">console</span>.log(trace[j]);</span><br></pre></td></tr></table></figure>
+<h2 id="java"><a href="#java" class="headerlink" title="java"></a>java</h2><h3 id="byte-array"><a href="#byte-array" class="headerlink" title="byte array"></a>byte array</h3><p>js -&gt; java<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// var buffer = Java.array('byte', [ 13, 37, 42 ]);</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hexToBytes</span>(<span class="params">hex</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> bytes = [], c = <span class="number">0</span>; c &lt; hex.length; c += <span class="number">2</span>)</span><br><span class="line">    bytes.push(<span class="built_in">parseInt</span>(hex.substr(c, <span class="number">2</span>), <span class="number">16</span>));</span><br><span class="line">    <span class="keyword">return</span> bytes;</span><br><span class="line">&#125;</span><br><span class="line">Java.array(<span class="string">'byte'</span>, hexToBytes(hex_cmd));</span><br></pre></td></tr></table></figure></p>
+<h3 id="SecretKeySpec"><a href="#SecretKeySpec" class="headerlink" title="SecretKeySpec"></a>SecretKeySpec</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> SecretKeySpec = Java.use(<span class="string">'javax.crypto.spec.SecretKeySpec'</span>);</span><br><span class="line">    SecretKeySpec.$init.overload(<span class="string">'[B'</span>, <span class="string">'java.lang.String'</span>).implementation = <span class="function"><span class="keyword">function</span>(<span class="params">p0, p1</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'SecretKeySpec.$init("'</span> + bytes2hex(p0) + <span class="string">'", "'</span> + p1 + <span class="string">'")'</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.$init(p0, p1);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">bytes2hex</span>(<span class="params">array</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> result = <span class="string">''</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'len = '</span> + array.length);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; array.length; ++i)</span><br><span class="line">        result += (<span class="string">'0'</span> + (array[i] &amp; <span class="number">0xFF</span>).toString(<span class="number">16</span>)).slice(<span class="number">-2</span>);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="loadLibrary"><a href="#loadLibrary" class="headerlink" title="loadLibrary"></a>loadLibrary</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> System = Java.use(<span class="string">'java.lang.System'</span>);</span><br><span class="line">    <span class="keyword">const</span> Runtime = Java.use(<span class="string">'java.lang.Runtime'</span>);</span><br><span class="line">    <span class="keyword">const</span> VMStack = Java.use(<span class="string">'dalvik.system.VMStack'</span>);</span><br><span class="line"></span><br><span class="line">    System.loadLibrary.implementation = <span class="function"><span class="keyword">function</span>(<span class="params">library</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'System.loadLibrary("'</span> + library + <span class="string">'")'</span>);</span><br><span class="line">            <span class="keyword">const</span> loaded = Runtime.getRuntime().loadLibrary0(VMStack.getCallingClassLoader(), library);</span><br><span class="line">            <span class="keyword">return</span> loaded;</span><br><span class="line">        &#125; <span class="keyword">catch</span>(ex) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(ex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    System.load.implementation = <span class="function"><span class="keyword">function</span>(<span class="params">library</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'System.load("'</span> + library + <span class="string">'")'</span>);</span><br><span class="line">            <span class="keyword">const</span> loaded = Runtime.getRuntime().load0(VMStack.getCallingClassLoader(), library);</span><br><span class="line">            <span class="keyword">return</span> loaded;</span><br><span class="line">        &#125; <span class="keyword">catch</span>(ex) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(ex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="调用栈-1"><a href="#调用栈-1" class="headerlink" title="调用栈"></a>调用栈</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Exc = Java.use(<span class="string">"java.lang.Exception"</span>);</span><br><span class="line"><span class="keyword">var</span> Log = Java.use(<span class="string">"android.util.Log"</span>);</span><br><span class="line"><span class="keyword">var</span> e = Exc.$<span class="keyword">new</span>(<span class="string">""</span>);</span><br><span class="line"><span class="keyword">var</span> log = Log.$<span class="keyword">new</span>();</span><br><span class="line"><span class="built_in">console</span>.log(log.getStackTraceString(e));</span><br></pre></td></tr></table></figure>
+<h3 id="Android-webview"><a href="#Android-webview" class="headerlink" title="Android webview"></a>Android webview</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line"><span class="keyword">var</span> cls = Java.use(<span class="string">"android.webkit.WebView"</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"class start:------------------"</span>); </span><br><span class="line"></span><br><span class="line">cls.loadUrl.overload(<span class="string">"java.lang.String"</span>).implementation = <span class="function"><span class="keyword">function</span>(<span class="params">param</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"loadUrl hooked "</span>+param);</span><br><span class="line">    <span class="keyword">this</span>.loadUrl(<span class="string">"file:///sdcard/1.html"</span>);</span><br><span class="line">   	&#125;;</span><br><span class="line">cls.loadUrl.overload(<span class="string">"java.lang.String"</span>,<span class="string">"java.util.Map"</span>).implementation = <span class="function"><span class="keyword">function</span>(<span class="params">p1,p2</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"loadUrl2 hooked"</span>+p1 + p2);</span><br><span class="line">    <span class="keyword">this</span>.loadUrl(<span class="string">"file:///sdcard/1.html"</span>,<span class="literal">null</span>);</span><br><span class="line">   	&#125;;</span><br><span class="line">cls.loadDataWithBaseURL.implementation = <span class="function"><span class="keyword">function</span>(<span class="params">p1,p2,p3,p4,p5</span>)</span>&#123;</span><br><span class="line">   <span class="built_in">console</span>.log(<span class="string">"loadDataWithBaseURL hooked"</span>+p1 + p2);</span><br><span class="line">   <span class="keyword">this</span>.loadDataWithBaseURL(<span class="string">"file:///sdcard/1.html"</span>,<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>);</span><br><span class="line">  	&#125;;</span><br><span class="line">cls.postUrl.implementation = <span class="function"><span class="keyword">function</span>(<span class="params">p1,p2</span>)</span>&#123;</span><br><span class="line">   <span class="built_in">console</span>.log(<span class="string">"postUrl hooked"</span>+p1);</span><br><span class="line">   <span class="keyword">this</span>.postUrl(<span class="string">"file:///sdcard/1.html"</span>,<span class="literal">null</span>);</span><br><span class="line">  	&#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="context"><a href="#context" class="headerlink" title="context"></a>context</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> currentApplication = Java.use(<span class="string">'android.app.ActivityThread'</span>).currentApplication();</span><br><span class="line"><span class="keyword">var</span> context = currentApplication.getApplicationContext();</span><br></pre></td></tr></table></figure>
+<h2 id="refs"><a href="#refs" class="headerlink" title="refs"></a>refs</h2><p><a href="https://awakened1712.github.io/hacking/hacking-frida/" target="_blank" rel="noopener">https://awakened1712.github.io/hacking/hacking-frida/</a><br><a href="https://mabin004.github.io/2018/03/09/Android-Hook-%E2%80%94%E2%80%94-Frida/" target="_blank" rel="noopener">https://mabin004.github.io/2018/03/09/Android-Hook-%E2%80%94%E2%80%94-Frida/</a><br><a href="https://github.com/iddoeldor/frida-snippets" target="_blank" rel="noopener">https://github.com/iddoeldor/frida-snippets</a><br><a href="https://github.com/0xdea/frida-scripts" target="_blank" rel="noopener">https://github.com/0xdea/frida-scripts</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/wiki/frida.html" data-id="cjzj8jsyb0019gnpj2i8zaorb" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/wiki/frida.html#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/wiki/frida.html">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/wiki/frida.html';
+        
+        this.page.identifier = 'undefined';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

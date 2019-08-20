@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>MySQL注入检测 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="SQL 注入主要分两类，一类输入是字符型的，另一类输入是整数型的。在实际情况中，测试的站点可能存在waf，同时为了减少报警，尽量发送少的请求。为了达到这个效果，需要合理的规划发送的请求，而不是把payload一股脑的打出去。 一般来说，目标的输入可能是数字，可能是个字符串。输入是数字的时候对应查询的sql语句也可能以字符串的方式进行查询。 检测注入的流程可以根据测试的结果剪枝。基本流程为先检测报错">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL注入检测">
+<meta property="og:url" content="http://5alt.me/2018/01/MySQL注入检测/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="SQL 注入主要分两类，一类输入是字符型的，另一类输入是整数型的。在实际情况中，测试的站点可能存在waf，同时为了减少报警，尽量发送少的请求。为了达到这个效果，需要合理的规划发送的请求，而不是把payload一股脑的打出去。 一般来说，目标的输入可能是数字，可能是个字符串。输入是数字的时候对应查询的sql语句也可能以字符串的方式进行查询。 检测注入的流程可以根据测试的结果剪枝。基本流程为先检测报错">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.784Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL注入检测">
+<meta name="twitter:description" content="SQL 注入主要分两类，一类输入是字符型的，另一类输入是整数型的。在实际情况中，测试的站点可能存在waf，同时为了减少报警，尽量发送少的请求。为了达到这个效果，需要合理的规划发送的请求，而不是把payload一股脑的打出去。 一般来说，目标的输入可能是数字，可能是个字符串。输入是数字的时候对应查询的sql语句也可能以字符串的方式进行查询。 检测注入的流程可以根据测试的结果剪枝。基本流程为先检测报错">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-MySQL注入检测" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            MySQL注入检测
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2018/01/MySQL注入检测/">
+            <time datetime="2018-01-10T16:00:00.000Z" itemprop="datePublished">2018-01-11</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>SQL 注入主要分两类，一类输入是字符型的，另一类输入是整数型的。在实际情况中，测试的站点可能存在waf，同时为了减少报警，尽量发送少的请求。为了达到这个效果，需要合理的规划发送的请求，而不是把payload一股脑的打出去。</p>
+<p>一般来说，目标的输入可能是数字，可能是个字符串。输入是数字的时候对应查询的sql语句也可能以字符串的方式进行查询。</p>
+<p>检测注入的流程可以根据测试的结果剪枝。基本流程为先检测报错注入，再测试基于时间的注入。一般来讲，如果有waf的话，基于时间的注入会被拦截。如果没有延时的话，说明要么不在运算语句中，要么被waf拦截了，要么不存在注入。接下来根据请求的stable情况以及原始请求是否为空，进行bool型注入判断以及其他位置的注入判断。<br><a id="more"></a></p>
+<h2 id="延时注入"><a href="#延时注入" class="headerlink" title="延时注入"></a>延时注入</h2><p>延时注入能适用于输入作为值情况下的注入检测，在页面无明显报错的时候优先使用延时注入的方式进行检测。<br>延时注入一般有sleep和benchmark两种方式，这两种方式都能产生延时的效果，但是仍然有所差异。</p>
+<h3 id="sleep"><a href="#sleep" class="headerlink" title="sleep"></a>sleep</h3><p>sleep函数执行成功之后返回数字0。<br>在 and 语句中，只要有其中一个条件为假，sleep就不会执行。从实际的观察来看，sleep在各条件中的执行优先级最低。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select 1 and sleep(1);</span><br><span class="line">+<span class="comment">----------------+</span></span><br><span class="line">| 1 and sleep(1) |</span><br><span class="line">+<span class="comment">----------------+</span></span><br><span class="line">|              0 |</span><br><span class="line">+<span class="comment">----------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">1.07</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">0</span> <span class="keyword">and</span> <span class="keyword">sleep</span>(<span class="number">1</span>);</span><br><span class="line">+<span class="comment">----------------+</span></span><br><span class="line">| 0 and sleep(1) |</span><br><span class="line">+<span class="comment">----------------+</span></span><br><span class="line">|              0 |</span><br><span class="line">+<span class="comment">----------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">sleep</span>(<span class="number">1</span>) <span class="keyword">and</span> <span class="keyword">id</span>=<span class="number">0</span>;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">sleep</span>(<span class="number">1</span>) <span class="keyword">and</span> <span class="keyword">id</span>=<span class="number">1</span>;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">1.07</span> sec)</span><br></pre></td></tr></table></figure></p>
+<p>在 or 语句中，sleep的执行次数与当前列数相同，因为根据查询条件，每一列都会比较一次。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select count(*) from users;</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">| count(*) |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">|        9 |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">0</span> <span class="keyword">or</span> <span class="keyword">sleep</span>(<span class="number">1</span>);</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">9.67</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">sleep</span>(<span class="number">1</span>) <span class="keyword">or</span> <span class="keyword">id</span>=<span class="number">0</span>;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">9.63</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">sleep</span>(<span class="number">1</span>) <span class="keyword">or</span> <span class="keyword">id</span>=<span class="number">1</span>;</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">| 1 |</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">| 1 |</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">9.51</span> sec)</span><br></pre></td></tr></table></figure>
+<p>为了防止 or 语句中的多次延时，可以使用 (select 1 from (select sleep(5))x) 的方式来避免执行多次。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select 1 from users where id=1 or (select 1 from (select sleep(5))x);</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">| 1 |</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">| 1 |</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">9 rows in <span class="keyword">set</span> (<span class="number">5.07</span> sec)</span><br></pre></td></tr></table></figure></p>
+<h3 id="benchmark"><a href="#benchmark" class="headerlink" title="benchmark"></a>benchmark</h3><p>benchmark的sleep的延时表现有所差异。<br>在 and 语句中，单纯select的时候是不会延时的，而在where语句中则会延时，即使部分条件明显为假。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select 1 and benchmark(10000000,null);</span><br><span class="line">+<span class="comment">--------------------------------+</span></span><br><span class="line">| 1 and benchmark(10000000,null) |</span><br><span class="line">+<span class="comment">--------------------------------+</span></span><br><span class="line">|                              0 |</span><br><span class="line">+<span class="comment">--------------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">2.17</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">0</span> <span class="keyword">and</span> <span class="keyword">benchmark</span>(<span class="number">10000000</span>,<span class="literal">null</span>);</span><br><span class="line">+<span class="comment">--------------------------------+</span></span><br><span class="line">| 0 and benchmark(10000000,null) |</span><br><span class="line">+<span class="comment">--------------------------------+</span></span><br><span class="line">|                              0 |</span><br><span class="line">+<span class="comment">--------------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">benchmark</span>(<span class="number">10000000</span>,<span class="literal">null</span>) <span class="keyword">and</span> <span class="keyword">id</span>=<span class="number">1</span>;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">2.17</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">benchmark</span>(<span class="number">10000000</span>,<span class="literal">null</span>) <span class="keyword">and</span> <span class="keyword">id</span>=<span class="number">0</span>;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">2.15</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">benchmark</span>(<span class="number">10000000</span>,<span class="literal">null</span>) <span class="keyword">and</span> <span class="number">0</span>=<span class="number">1</span>;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">2.15</span> sec)</span><br></pre></td></tr></table></figure>
+<p>在 or 语句中，不会根据列数而多次延时。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select 1 from users where benchmark(10000000,null) or id=0;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">2.22</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> <span class="number">1</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">benchmark</span>(<span class="number">10000000</span>,<span class="literal">null</span>) <span class="keyword">or</span> <span class="keyword">id</span>=<span class="number">1</span>;</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">| 1 |</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">| 1 |</span><br><span class="line">+<span class="comment">---+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">2.18</span> sec)</span><br></pre></td></tr></table></figure></p>
+<p>从上面可以看到，benchmark比sleep更加好用一些。但是benchmark无法精确的控制延时的时间。</p>
+<h3 id="INSERT-中的延时"><a href="#INSERT-中的延时" class="headerlink" title="INSERT 中的延时"></a>INSERT 中的延时</h3><p>在INSERT注入中，需要让延时语句参与运算。<br>对于预期为字符串类型的输入，如果直接用加减或者逻辑与或等操作，很可能会导致语句出错。可以考虑用数字类型的字符串，利用mysql的类型转换功能进行操作，或者用适用于字符串的操作如<code>like</code>。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into users(username, isadmin)values('a'-sleep(1), 1);</span><br><span class="line">ERROR 1292 (22007): Truncated incorrect DOUBLE value: 'a'</span><br><span class="line"></span><br><span class="line">mysql&gt;  insert into users(username, isadmin)values('a' and sleep(1)='', 1);</span><br><span class="line">ERROR 1292 (22007): Truncated incorrect DOUBLE value: 'a'</span><br><span class="line"></span><br><span class="line">mysql&gt; insert into users(username, isadmin)values('1'-sleep(1)-'1', 1);</span><br><span class="line">Query OK, 1 row affected (1.07 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; insert into users(username, isadmin)values('aaa' like sleep(1)='', 1);</span><br><span class="line">Query OK, 1 row affected (1.08 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT * FROM users where username='aa' like benchmark(10000000,null);</span><br><span class="line">+<span class="comment">-----------------------+---------+----+</span></span><br><span class="line">| username              | isadmin | id |</span><br><span class="line">+<span class="comment">-----------------------+---------+----+</span></span><br><span class="line">| Herp Derper           |       1 |  1 |</span><br><span class="line">| SlapdeBack LovedeFace |       1 |  2 |</span><br><span class="line">| Wengdack Slobdegoob   |       0 |  3 |</span><br><span class="line">| Chunk MacRunfast      |       0 |  4 |</span><br><span class="line">| Peter Weiner          |       0 |  5 |</span><br><span class="line">| aaa                   |       0 |  6 |</span><br><span class="line">| 0                     |       0 |  8 |</span><br><span class="line">| 0                     |       1 |  9 |</span><br><span class="line">+<span class="comment">-----------------------+---------+----+</span></span><br><span class="line">8 rows in <span class="keyword">set</span>, <span class="number">6</span> <span class="keyword">warnings</span> (<span class="number">3.82</span> sec)</span><br></pre></td></tr></table></figure>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>在测试延时注入的时候，尽量选择用benchmark函数。对字符类型的输入，用like语句进行延时判断，对数字类型的语句可以选择逻辑运算或者加减运算。</p>
+<p>延时注入这一步可以检测出没有waf情况下的运算语句处的注入。经过这一步，后续只需要检测存在waf的情况下注入检测以及其他位置注入检测这两种情况。</p>
+<h2 id="bool注入"><a href="#bool注入" class="headerlink" title="bool注入"></a>bool注入</h2><p>在测试完延时注入之后，用bool注入来检测存在waf的情况下运算语句位置的注入。</p>
+<h3 id="检测请求是否stable"><a href="#检测请求是否stable" class="headerlink" title="检测请求是否stable"></a>检测请求是否stable</h3><p>响应中可能包含一些与时间有关的数据，以及类似 csrftoken 之类的hash，为了防止对判断的干扰，需要去掉这类的字符串。此外，用户的输入也可能回显在页面中，有的时候也需要将输入去除。<br>sqlmap 的方式是采用<code>difflib.SequenceMatcher</code>计算相同的比率，根据比率来判断网页是否相同。<br>AWVS 中是采用正则去除可能的时间戳，然后根据输入的长度来去除响应中的输入。<br>这两种方式都存在一些问题。在返回内容较短的情况下（如 ajax请求），计算比率会出现较大的误差。而AWVS的方式采用了写死的正则，不能保证去除所有的变化的内容。并且某些输入可能是一个常见的单词，强行替换可能会影响后续的响应比较。</p>
+<p>最终还是选择采用 AWVS 的方式并做了一些优化。（其实可以在替换之后再计算相同的比率？）</p>
+<h3 id="检测原始请求是否为空"><a href="#检测原始请求是否为空" class="headerlink" title="检测原始请求是否为空"></a>检测原始请求是否为空</h3><p>在原始请求从数据库获取数据为空的时候，就很难通过 bool 型注入进行注入点的判断。</p>
+<h3 id="检测请求为空时响应是否和出错时相同"><a href="#检测请求为空时响应是否和出错时相同" class="headerlink" title="检测请求为空时响应是否和出错时相同"></a>检测请求为空时响应是否和出错时相同</h3><p>在不同的情况下可以通过一些简单的运算以及强制类型转换的性质来判断出是否存在注入。</p>
+<h2 id="其他位置注入"><a href="#其他位置注入" class="headerlink" title="其他位置注入"></a>其他位置注入</h2><h3 id="limit-注入"><a href="#limit-注入" class="headerlink" title="limit 注入"></a>limit 注入</h3><p>在请求为空时采用延时注入判断，在有waf的情况下加注释符判断。</p>
+<h3 id="order-by-group-by-asc-desc-注入"><a href="#order-by-group-by-asc-desc-注入" class="headerlink" title="order by/group by/asc/desc 注入"></a>order by/group by/asc/desc 注入</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">order by username,1</span><br><span class="line">order by username asc,1  正确</span><br><span class="line">order by username asc,999 错误</span><br></pre></td></tr></table></figure>
+<p>最后附个脑图 <a href="/downloads/MySQL注入检测.png">MySQL注入检测</a> 。</p>
+<p>感谢雨大佬的指导~</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2018/01/MySQL注入检测/" data-id="cjzj8jsyq0024gnpjp4cqxyce" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2018/01/MySQL注入检测/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2018/01/MySQL注入检测/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/01/子域名收集及端口扫描之ZeroScan/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    子域名收集及端口扫描之ZeroScan
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/01/qemu、iptables和交叉编译/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">qemu、iptables和交叉编译</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2018/01/MySQL注入检测/';
+        
+        this.page.identifier = 'MySQL注入检测';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

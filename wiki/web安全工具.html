@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>一些常用工具整理 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="windows 免杀远控Cobalt Strike 信息收集C段https://phpinfo.me/bing.php 公司ip段http://bgp.he.net 同ip反查http://i.links.cn/sameip/61.164.241.103.htmlhttp://s.tool.chinaz.com/samehttp://www.114best.com/ip/114.aspxhttps">
+<meta property="og:type" content="website">
+<meta property="og:title" content="一些常用工具整理">
+<meta property="og:url" content="http://5alt.me/wiki/web安全工具.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="windows 免杀远控Cobalt Strike 信息收集C段https://phpinfo.me/bing.php 公司ip段http://bgp.he.net 同ip反查http://i.links.cn/sameip/61.164.241.103.htmlhttp://s.tool.chinaz.com/samehttp://www.114best.com/ip/114.aspxhttps">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.941Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一些常用工具整理">
+<meta name="twitter:description" content="windows 免杀远控Cobalt Strike 信息收集C段https://phpinfo.me/bing.php 公司ip段http://bgp.he.net 同ip反查http://i.links.cn/sameip/61.164.241.103.htmlhttp://s.tool.chinaz.com/samehttp://www.114best.com/ip/114.aspxhttps">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="page-undefined" class="article article-type-page" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            一些常用工具整理
+        </h1>
+    
+
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="windows-免杀远控"><a href="#windows-免杀远控" class="headerlink" title="windows 免杀远控"></a>windows 免杀远控</h2><p>Cobalt Strike</p>
+<h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><h3 id="C段"><a href="#C段" class="headerlink" title="C段"></a>C段</h3><p><a href="https://phpinfo.me/bing.php" target="_blank" rel="noopener">https://phpinfo.me/bing.php</a></p>
+<h3 id="公司ip段"><a href="#公司ip段" class="headerlink" title="公司ip段"></a>公司ip段</h3><p><a href="http://bgp.he.net" target="_blank" rel="noopener">http://bgp.he.net</a></p>
+<h3 id="同ip反查"><a href="#同ip反查" class="headerlink" title="同ip反查"></a>同ip反查</h3><p><a href="http://i.links.cn/sameip/61.164.241.103.html" target="_blank" rel="noopener">http://i.links.cn/sameip/61.164.241.103.html</a><br><a href="http://s.tool.chinaz.com/same" target="_blank" rel="noopener">http://s.tool.chinaz.com/same</a><br><a href="http://www.114best.com/ip/114.aspx" target="_blank" rel="noopener">http://www.114best.com/ip/114.aspx</a><br><a href="https://www.yougetsignal.com/tools/web-sites-on-web-server/" target="_blank" rel="noopener">https://www.yougetsignal.com/tools/web-sites-on-web-server/</a><br><a href="http://tool.114la.com/sameip/" target="_blank" rel="noopener">http://tool.114la.com/sameip/</a><br><a href="http://www.sameip.org/" target="_blank" rel="noopener">http://www.sameip.org/</a></p>
+<h3 id="Transparency-Monitoring"><a href="#Transparency-Monitoring" class="headerlink" title="Transparency Monitoring"></a>Transparency Monitoring</h3><p><a href="https://developers.facebook.com/tools/ct/" target="_blank" rel="noopener">https://developers.facebook.com/tools/ct/</a><br><a href="https://transparencyreport.google.com/https/certificates" target="_blank" rel="noopener">https://transparencyreport.google.com/https/certificates</a></p>
+<h3 id="passive-dns"><a href="#passive-dns" class="headerlink" title="passive dns"></a>passive dns</h3><p><a href="https://www.circl.lu/services/passive-dns/" target="_blank" rel="noopener">https://www.circl.lu/services/passive-dns/</a><br><a href="https://www.passivetotal.org/" target="_blank" rel="noopener">https://www.passivetotal.org/</a><br><a href="https://www.virustotal.com/fr/documentation/public-api/#getting-ip-reports" target="_blank" rel="noopener">https://www.virustotal.com/fr/documentation/public-api/#getting-ip-reports</a><br><a href="https://dnsdumpster.com/" target="_blank" rel="noopener">https://dnsdumpster.com/</a><br><a href="https://findsubdomains.com/" target="_blank" rel="noopener">https://findsubdomains.com/</a><br><a href="https://github.com/michenriksen/aquatone" target="_blank" rel="noopener">https://github.com/michenriksen/aquatone</a><br><a href="https://github.com/d4wner/farmscan_domain_plus" target="_blank" rel="noopener">https://github.com/d4wner/farmscan_domain_plus</a></p>
+<h3 id="地区ip"><a href="#地区ip" class="headerlink" title="地区ip"></a>地区ip</h3><p>中国ip <a href="http://www.ipdeny.com/ipblocks/data/countries/cn.zone" target="_blank" rel="noopener">http://www.ipdeny.com/ipblocks/data/countries/cn.zone</a></p>
+<h3 id="网站证书查看"><a href="#网站证书查看" class="headerlink" title="网站证书查看"></a>网站证书查看</h3><p><a href="http://web.chacuo.net/netsslcheck" target="_blank" rel="noopener">http://web.chacuo.net/netsslcheck</a></p>
+<h3 id="域名历史"><a href="#域名历史" class="headerlink" title="域名历史"></a>域名历史</h3><p><a href="http://toolbar.netcraft.com/site_report?url=5alt.me" target="_blank" rel="noopener">http://toolbar.netcraft.com/site_report?url=5alt.me</a><br><a href="https://www.benmi.com/whoishistory/" target="_blank" rel="noopener">https://www.benmi.com/whoishistory/</a></p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p><a href="https://x.threatbook.cn/" target="_blank" rel="noopener">https://x.threatbook.cn/</a><br><a href="https://censys.io/data" target="_blank" rel="noopener">https://censys.io/data</a></p>
+<h3 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h3><p><a href="https://scans.io/study/sonar.fdns_v2" target="_blank" rel="noopener">https://scans.io/study/sonar.fdns_v2</a><br><a href="https://data.4tu.nl/repository/uuid:1ef815ea-cb39-4b41-8db6-c1008af6d5aa" target="_blank" rel="noopener">https://data.4tu.nl/repository/uuid:1ef815ea-cb39-4b41-8db6-c1008af6d5aa</a> （DNS Queries to Authoritative DNS Server at SURFnet by Google’s Public DNS Resolver）</p>
+<h3 id="扫描器"><a href="#扫描器" class="headerlink" title="扫描器"></a>扫描器</h3><p><a href="https://github.com/lijiejie/BBScan" target="_blank" rel="noopener">https://github.com/lijiejie/BBScan</a><br><a href="https://github.com/We5ter/Scanners-Box" target="_blank" rel="noopener">https://github.com/We5ter/Scanners-Box</a><br><a href="https://github.com/xmendez/wfuzz" target="_blank" rel="noopener">https://github.com/xmendez/wfuzz</a></p>
+<h3 id="查找cdn后原始ip"><a href="#查找cdn后原始ip" class="headerlink" title="查找cdn后原始ip"></a>查找cdn后原始ip</h3><p><a href="https://github.com/christophetd/CloudFlair" target="_blank" rel="noopener">https://github.com/christophetd/CloudFlair</a><br><a href="https://github.com/MindPointGroup/cloudfrunt" target="_blank" rel="noopener">https://github.com/MindPointGroup/cloudfrunt</a></p>
+<h3 id="端口扫描"><a href="#端口扫描" class="headerlink" title="端口扫描"></a>端口扫描</h3><h4 id="zmap-扫单一端口"><a href="#zmap-扫单一端口" class="headerlink" title="zmap 扫单一端口"></a>zmap 扫单一端口</h4><p>sudo zmap -p 80 -o results.csv 10.0.0.0/24</p>
+<h4 id="massscan-扫多端口"><a href="#massscan-扫多端口" class="headerlink" title="massscan 扫多端口"></a>massscan 扫多端口</h4><p>sudo ./masscan -p1-65535 10.0.0.024 -oJ result.json</p>
+<h2 id="隐藏身份"><a href="#隐藏身份" class="headerlink" title="隐藏身份"></a>隐藏身份</h2><p><a href="https://www.noip.com/" target="_blank" rel="noopener">https://www.noip.com/</a><br><a href="https://github.com/fate0/proxylist/blob/master/proxy.list" target="_blank" rel="noopener">https://github.com/fate0/proxylist/blob/master/proxy.list</a><br>127.0.0.1.xip.io<br><a href="https://proxy.coderbusy.com/" target="_blank" rel="noopener">https://proxy.coderbusy.com/</a><br><a href="https://github.com/SpiderClub/haipproxy" target="_blank" rel="noopener">https://github.com/SpiderClub/haipproxy</a></p>
+<h2 id="社工库"><a href="#社工库" class="headerlink" title="社工库"></a>社工库</h2><h3 id="不打码"><a href="#不打码" class="headerlink" title="不打码"></a>不打码</h3><p><a href="https://dumpedlqezarfife.onion.lu/" target="_blank" rel="noopener">https://dumpedlqezarfife.onion.lu/</a></p>
+<h3 id="打码"><a href="#打码" class="headerlink" title="打码"></a>打码</h3><p><a href="http://163.donothackme.club/" target="_blank" rel="noopener">http://163.donothackme.club/</a><br><a href="https://haveibeenpwned.com/" target="_blank" rel="noopener">https://haveibeenpwned.com/</a></p>
+<h3 id="注册查询"><a href="#注册查询" class="headerlink" title="注册查询"></a>注册查询</h3><p><a href="https://namechk.com/" target="_blank" rel="noopener">https://namechk.com/</a><br><a href="http://www.reg007.com/" target="_blank" rel="noopener">http://www.reg007.com/</a></p>
+<h3 id="Twitter信息查询"><a href="#Twitter信息查询" class="headerlink" title="Twitter信息查询"></a>Twitter信息查询</h3><p><a href="https://tinfoleak.com/" target="_blank" rel="noopener">https://tinfoleak.com/</a></p>
+<h3 id="社工库搜索"><a href="#社工库搜索" class="headerlink" title="社工库搜索"></a>社工库搜索</h3><p><a href="https://github.com/woanware/LogViewer" target="_blank" rel="noopener">https://github.com/woanware/LogViewer</a><br><a href="http://sary.sourceforge.net/" target="_blank" rel="noopener">http://sary.sourceforge.net/</a> 10e以下数据推荐</p>
+<h2 id="hash"><a href="#hash" class="headerlink" title="hash"></a>hash</h2><h3 id="md5"><a href="#md5" class="headerlink" title="md5"></a>md5</h3><p><a href="http://cmd5.com/" target="_blank" rel="noopener">http://cmd5.com/</a><br><a href="http://www.md5.cc/" target="_blank" rel="noopener">http://www.md5.cc/</a><br><a href="https://www.somd5.com/" target="_blank" rel="noopener">https://www.somd5.com/</a><br><a href="http://pmd5.com/" target="_blank" rel="noopener">http://pmd5.com/</a></p>
+<h3 id="window-hash"><a href="#window-hash" class="headerlink" title="window hash"></a>window hash</h3><p><a href="http://www.objectif-securite.ch/ophcrack.php" target="_blank" rel="noopener">http://www.objectif-securite.ch/ophcrack.php</a></p>
+<h2 id="漏洞库"><a href="#漏洞库" class="headerlink" title="漏洞库"></a>漏洞库</h2><p><a href="https://sploitus.com/" target="_blank" rel="noopener">https://sploitus.com/</a><br><a href="https://www.vulncode-db.com/" target="_blank" rel="noopener">https://www.vulncode-db.com/</a></p>
+<h2 id="url-搜索（可以搜到一些恶意网站）"><a href="#url-搜索（可以搜到一些恶意网站）" class="headerlink" title="url 搜索（可以搜到一些恶意网站）"></a>url 搜索（可以搜到一些恶意网站）</h2><p><a href="https://urlscan.io/search/#*" target="_blank" rel="noopener">https://urlscan.io/search/#*</a></p>
+<h2 id="密码生成"><a href="#密码生成" class="headerlink" title="密码生成"></a>密码生成</h2><p><a href="https://github.com/bit4woo/passmaker" target="_blank" rel="noopener">https://github.com/bit4woo/passmaker</a><br>字典 <a href="https://github.com/rootphantomer/Blasting_dictionary" target="_blank" rel="noopener">https://github.com/rootphantomer/Blasting_dictionary</a><br><a href="https://github.com/LandGrey/pydictor" target="_blank" rel="noopener">https://github.com/LandGrey/pydictor</a></p>
+<h2 id="勒索软件解密"><a href="#勒索软件解密" class="headerlink" title="勒索软件解密"></a>勒索软件解密</h2><p><a href="https://www.nomoreransom.org/" target="_blank" rel="noopener">https://www.nomoreransom.org/</a></p>
+<h2 id="批量扫描"><a href="#批量扫描" class="headerlink" title="批量扫描"></a>批量扫描</h2><p><a href="https://fofa.so/" target="_blank" rel="noopener">https://fofa.so/</a><br><a href="https://www.zoomeye.org" target="_blank" rel="noopener">https://www.zoomeye.org</a></p>
+<h2 id="web-指纹识别"><a href="#web-指纹识别" class="headerlink" title="web 指纹识别"></a>web 指纹识别</h2><p><a href="https://github.com/Ms0x0/Dayu" target="_blank" rel="noopener">https://github.com/Ms0x0/Dayu</a><br><a href="https://github.com/boy-hack/w9scan" target="_blank" rel="noopener">https://github.com/boy-hack/w9scan</a><br><a href="https://github.com/Tuhinshubhra/CMSeeK" target="_blank" rel="noopener">https://github.com/Tuhinshubhra/CMSeeK</a></p>
+<h2 id="渗透辅助"><a href="#渗透辅助" class="headerlink" title="渗透辅助"></a>渗透辅助</h2><p><a href="https://github.com/BugScanTeam/DNSLog" target="_blank" rel="noopener">https://github.com/BugScanTeam/DNSLog</a></p>
+<h2 id="在线运行"><a href="#在线运行" class="headerlink" title="在线运行"></a>在线运行</h2><p>php <a href="https://3v4l.org/" target="_blank" rel="noopener">https://3v4l.org/</a></p>
+<h2 id="数据库连接"><a href="#数据库连接" class="headerlink" title="数据库连接"></a>数据库连接</h2><p><a href="https://www.adminer.org" target="_blank" rel="noopener">https://www.adminer.org</a></p>
+<h2 id="java-反序列化问题"><a href="#java-反序列化问题" class="headerlink" title="java 反序列化问题"></a>java 反序列化问题</h2><p><a href="https://github.com/mbechler/marshalsec" target="_blank" rel="noopener">https://github.com/mbechler/marshalsec</a><br><a href="https://github.com/GrrrDog/Java-Deserialization-Cheat-Sheet" target="_blank" rel="noopener">https://github.com/GrrrDog/Java-Deserialization-Cheat-Sheet</a><br><a href="https://github.com/federicodotta/Java-Deserialization-Scanner" target="_blank" rel="noopener">https://github.com/federicodotta/Java-Deserialization-Scanner</a></p>
+<h2 id="web-学习"><a href="#web-学习" class="headerlink" title="web 学习"></a>web 学习</h2><p><a href="https://github.com/CHYbeta/Web-Security-Learning" target="_blank" rel="noopener">https://github.com/CHYbeta/Web-Security-Learning</a></p>
+<h2 id="静态代码分析"><a href="#静态代码分析" class="headerlink" title="静态代码分析"></a>静态代码分析</h2><p>java <a href="http://find-sec-bugs.github.io/" target="_blank" rel="noopener">http://find-sec-bugs.github.io/</a><br>ruby <a href="https://github.com/thesp0nge/dawnscanner" target="_blank" rel="noopener">https://github.com/thesp0nge/dawnscanner</a><br><a href="https://github.com/nccgroup/VCG" target="_blank" rel="noopener">https://github.com/nccgroup/VCG</a></p>
+<h2 id="php-代码加密解密"><a href="#php-代码加密解密" class="headerlink" title="php 代码加密解密"></a>php 代码加密解密</h2><p>PHP代码修复工具(针对乱码类、混淆类文件修复) <a href="http://zhaoyuanma.com/phpcodefix.html" target="_blank" rel="noopener">http://zhaoyuanma.com/phpcodefix.html</a></p>
+<h2 id="前端库安全"><a href="#前端库安全" class="headerlink" title="前端库安全"></a>前端库安全</h2><p><a href="https://retirejs.github.io/retire.js/" target="_blank" rel="noopener">https://retirejs.github.io/retire.js/</a></p>
+<h2 id="github-搜索"><a href="#github-搜索" class="headerlink" title="github 搜索"></a>github 搜索</h2><p><a href="https://github.com/5alt/GitLeak" target="_blank" rel="noopener">https://github.com/5alt/GitLeak</a><br><a href="https://github.com/zricethezav/gitleaks" target="_blank" rel="noopener">https://github.com/zricethezav/gitleaks</a></p>
+<h2 id="unicode-同形字"><a href="#unicode-同形字" class="headerlink" title="unicode 同形字"></a>unicode 同形字</h2><p><a href="http://www.unicode.org/Public/security/latest/confusablesSummary.txt" target="_blank" rel="noopener">http://www.unicode.org/Public/security/latest/confusablesSummary.txt</a></p>
+<h2 id="反编译-flash"><a href="#反编译-flash" class="headerlink" title="反编译 flash"></a>反编译 flash</h2><p><a href="https://www.free-decompiler.com/flash/" target="_blank" rel="noopener">https://www.free-decompiler.com/flash/</a></p>
+<h2 id="git-svn-泄露"><a href="#git-svn-泄露" class="headerlink" title="git/svn 泄露"></a>git/svn 泄露</h2><p><a href="https://github.com/anantshri/svn-extractor" target="_blank" rel="noopener">https://github.com/anantshri/svn-extractor</a><br><a href="https://github.com/BugScanTeam/GitHack" target="_blank" rel="noopener">https://github.com/BugScanTeam/GitHack</a></p>
+<h2 id="漏洞环境"><a href="#漏洞环境" class="headerlink" title="漏洞环境"></a>漏洞环境</h2><p><a href="https://github.com/Medicean/VulApps" target="_blank" rel="noopener">https://github.com/Medicean/VulApps</a><br><a href="https://github.com/vulhub/vulhub" target="_blank" rel="noopener">https://github.com/vulhub/vulhub</a></p>
+<h2 id="CSP-解析"><a href="#CSP-解析" class="headerlink" title="CSP 解析"></a>CSP 解析</h2><p><a href="https://csp-evaluator.withgoogle.com/" target="_blank" rel="noopener">https://csp-evaluator.withgoogle.com/</a></p>
+<h2 id="xss"><a href="#xss" class="headerlink" title="xss"></a>xss</h2><p><a href="https://github.com/masatokinugawa/filterbypass/wiki/Browser&#39;s-XSS-Filter-Bypass-Cheat-Sheet" target="_blank" rel="noopener">https://github.com/masatokinugawa/filterbypass/wiki/Browser&#39;s-XSS-Filter-Bypass-Cheat-Sheet</a></p>
+<h2 id="uxss"><a href="#uxss" class="headerlink" title="uxss"></a>uxss</h2><p><a href="https://github.com/Metnew/uxss-db" target="_blank" rel="noopener">https://github.com/Metnew/uxss-db</a></p>
+<h2 id="js-混淆"><a href="#js-混淆" class="headerlink" title="js 混淆"></a>js 混淆</h2><p><a href="https://github.com/javascript-obfuscator/javascript-obfuscator" target="_blank" rel="noopener">https://github.com/javascript-obfuscator/javascript-obfuscator</a><br><a href="https://javascriptobfuscator.herokuapp.com/" target="_blank" rel="noopener">https://javascriptobfuscator.herokuapp.com/</a><br><a href="https://github.com/mishoo/UglifyJS2" target="_blank" rel="noopener">https://github.com/mishoo/UglifyJS2</a><br><a href="https://prepack.io/getting-started.html" target="_blank" rel="noopener">https://prepack.io/getting-started.html</a></p>
+<h2 id="js-反混淆"><a href="#js-反混淆" class="headerlink" title="js 反混淆"></a>js 反混淆</h2><p><a href="https://mindedsecurity.github.io/jstillery/" target="_blank" rel="noopener">https://mindedsecurity.github.io/jstillery/</a><br><a href="https://github.com/mindedsecurity/JStillery" target="_blank" rel="noopener">https://github.com/mindedsecurity/JStillery</a></p>
+<h2 id="poc"><a href="#poc" class="headerlink" title="poc"></a>poc</h2><p><a href="https://github.com/CHYbeta/cmsPoc" target="_blank" rel="noopener">https://github.com/CHYbeta/cmsPoc</a><br><a href="https://github.com/Lucifer1993/AngelSword" target="_blank" rel="noopener">https://github.com/Lucifer1993/AngelSword</a></p>
+<h2 id="burpunlimited"><a href="#burpunlimited" class="headerlink" title="burpunlimited"></a>burpunlimited</h2><p><a href="https://sourceforge.net/projects/burpunlimited/?source=directory" target="_blank" rel="noopener">https://sourceforge.net/projects/burpunlimited/?source=directory</a><br><a href="https://github.com/bit4woo/u2c" target="_blank" rel="noopener">https://github.com/bit4woo/u2c</a></p>
+<h2 id="模板注入辅助"><a href="#模板注入辅助" class="headerlink" title="模板注入辅助"></a>模板注入辅助</h2><p><a href="https://github.com/epinna/tplmap" target="_blank" rel="noopener">https://github.com/epinna/tplmap</a></p>
+<h2 id="其他-1"><a href="#其他-1" class="headerlink" title="其他"></a>其他</h2><p>营业执照 <a href="http://zz.iis1.cn/" target="_blank" rel="noopener">http://zz.iis1.cn/</a><br>身份证生成 <a href="http://id.100xiao.com/" target="_blank" rel="noopener">http://id.100xiao.com/</a></p>
+<h2 id="爆破参数"><a href="#爆破参数" class="headerlink" title="爆破参数"></a>爆破参数</h2><p><a href="https://github.com/Bo0oM/ParamPamPam" target="_blank" rel="noopener">https://github.com/Bo0oM/ParamPamPam</a></p>
+<h2 id="nginx-配置生成"><a href="#nginx-配置生成" class="headerlink" title="nginx 配置生成"></a>nginx 配置生成</h2><p><a href="https://nginxconfig.io/" target="_blank" rel="noopener">https://nginxconfig.io/</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/wiki/web安全工具.html" data-id="cjzj8jsyi001xgnpj7kxy7o1d" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/wiki/web安全工具.html#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/wiki/web安全工具.html">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/wiki/web安全工具.html';
+        
+        this.page.identifier = 'undefined';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

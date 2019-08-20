@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>php里的随机数 | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="这次来填一个关于php随机数预测的坑。php5和php7中的随机数产生机制已经大有不同，本文将详细讲一讲这些区别和爆破种子的时候会产生的问题。 php中常用的随机数产生函数是rand()和mt_rand()。下面将针对这两个函数展开。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="php里的随机数">
+<meta property="og:url" content="http://5alt.me/2017/06/php里的随机数/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="这次来填一个关于php随机数预测的坑。php5和php7中的随机数产生机制已经大有不同，本文将详细讲一讲这些区别和爆破种子的时候会产生的问题。 php中常用的随机数产生函数是rand()和mt_rand()。下面将针对这两个函数展开。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-16T04:24:28.785Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="php里的随机数">
+<meta name="twitter:description" content="这次来填一个关于php随机数预测的坑。php5和php7中的随机数产生机制已经大有不同，本文将详细讲一讲这些区别和爆破种子的时候会产生的问题。 php中常用的随机数产生函数是rand()和mt_rand()。下面将针对这两个函数展开。">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                29
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-php里的随机数" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            php里的随机数
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/php里的随机数/">
+            <time datetime="2017-06-11T16:00:00.000Z" itemprop="datePublished">2017-06-12</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>这次来填一个关于php随机数预测的坑。php5和php7中的随机数产生机制已经大有不同，本文将详细讲一讲这些区别和爆破种子的时候会产生的问题。</p>
+<p>php中常用的随机数产生函数是<code>rand()</code>和<code>mt_rand()</code>。下面将针对这两个函数展开。<br><a id="more"></a></p>
+<h2 id="php5-中的随机数"><a href="#php5-中的随机数" class="headerlink" title="php5 中的随机数"></a>php5 中的随机数</h2><h3 id="rand"><a href="#rand" class="headerlink" title="rand"></a>rand</h3><p>php5 中的<code>rand</code>函数调用的是<code>glibc</code>中的<code>random()</code>。其实现算法可以简化为如下代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX 1000</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> seed 1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> r[MAX];</span><br><span class="line">  <span class="keyword">int</span> i;</span><br><span class="line"></span><br><span class="line">  r[<span class="number">0</span>] = seed;</span><br><span class="line">  <span class="keyword">for</span> (i=<span class="number">1</span>; i&lt;<span class="number">31</span>; i++) &#123;</span><br><span class="line">    r[i] = (<span class="number">16807L</span>L * r[i<span class="number">-1</span>]) % <span class="number">2147483647</span>;</span><br><span class="line">    <span class="keyword">if</span> (r[i] &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      r[i] += <span class="number">2147483647</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (i=<span class="number">31</span>; i&lt;<span class="number">34</span>; i++) &#123;</span><br><span class="line">    r[i] = r[i<span class="number">-31</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (i=<span class="number">34</span>; i&lt;<span class="number">344</span>; i++) &#123;</span><br><span class="line">    r[i] = r[i<span class="number">-31</span>] + r[i<span class="number">-3</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (i=<span class="number">344</span>; i&lt;MAX; i++) &#123;</span><br><span class="line">    r[i] = r[i<span class="number">-31</span>] + r[i<span class="number">-3</span>];</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, ((<span class="keyword">unsigned</span> <span class="keyword">int</span>)r[i]) &gt;&gt; <span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以看到，当前的随机数与之前第31个和之前第3个有关。因此只要获取了连续31个随机数，就有极大概率（输出的时候左移导致部分信息丢失）预测后面的随机数。</p>
+<h3 id="mt-rand"><a href="#mt-rand" class="headerlink" title="mt_rand"></a>mt_rand</h3><p>php5的<code>mt_rand</code>函数实现的是一个错误版本的<code>MT19937</code>随机数生成算法。<br>在<code>twist</code>函数中有个地方把变量弄错了 =。 =</p>
+<p>对php5的<code>mt_rand</code>的攻击就是根据几个随机数序列来爆破种子，然后推测出整个随机数的序列。工具是openwall的<code>php_mt_seed</code>。</p>
+<p>值得一提的是，<code>mt_rand</code>可以指定随机数产生的范围<code>int mt_rand ( int $min , int $max )</code>。此时产生随机数的方式是用一个宏来处理。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAND_RANGE(__n, __min, __max, __tmax) \</span></span><br><span class="line">    (__n) = (__min) + (<span class="keyword">long</span>) ((<span class="keyword">double</span>) ( (<span class="keyword">double</span>) (__max) - (__min) + <span class="number">1.0</span>) * ((__n) / ((__tmax) + <span class="number">1.0</span>)))</span><br><span class="line">...</span><br><span class="line">number = (<span class="keyword">long</span>) (php_mt_rand(TSRMLS_C) &gt;&gt; <span class="number">1</span>);</span><br><span class="line"><span class="keyword">if</span> (argc == <span class="number">2</span>) &#123;</span><br><span class="line">    RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);</span><br><span class="line">&#125;</span><br><span class="line">RETURN_LONG(number);</span><br></pre></td></tr></table></figure>
+<p>即用内置函数<code>php_mt_rand</code>产生的随机数进行乘除操作，得到位于合适范围的值。需要注意的是，无论<code>mt_rand</code>函数的调用带不带范围，其输出的结果与<code>php_mt_rand(TSRMLS_C) &gt;&gt; 1</code>有关。通过<code>mt_rand()</code>可以直接计算出<code>mt_rand(min, max)</code>来。</p>
+<h2 id="php7-中的随机数"><a href="#php7-中的随机数" class="headerlink" title="php7 中的随机数"></a>php7 中的随机数</h2><h3 id="rand-1"><a href="#rand-1" class="headerlink" title="rand"></a>rand</h3><p>php7中的<code>rand</code>函数同<code>mt_rand</code>，<code>srand</code>同<code>mt_srand</code>。</p>
+<h3 id="mt-rand-1"><a href="#mt-rand-1" class="headerlink" title="mt_rand"></a>mt_rand</h3><p>从 php 7.1.0 开始，<code>mt_rand</code>函数修复了之前对<code>MT19937</code>实现上的错误，但是仍然保留了错误版本的随机数生成方式。详情见<code>mt_srand</code>的文档。</p>
+<blockquote>
+<ul>
+<li>MT_RAND_MT19937    Uses the fixed, correct, Mersenne Twister implementation, available as of PHP 7.1.0.</li>
+<li>MT_RAND_PHP    Uses an incorrect Mersenne Twister implementation which was used as the default up till PHP 7.1.0. This mode is available for backward compatibility.</li>
+</ul>
+</blockquote>
+<p>除了修复<code>twist</code>函数的问题之外，在产生一个范围的随机数的时候，php7和php5的行为也不一致。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (argc == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// genrand_int31 in mt19937ar.c performs a right shift</span></span><br><span class="line">    RETURN_LONG(php_mt_rand() &gt;&gt; <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">RETURN_LONG(php_mt_rand_common(min, max));</span><br><span class="line">...</span><br><span class="line"><span class="keyword">if</span> (BG(mt_rand_mode) == MT_RAND_MT19937) &#123;</span><br><span class="line">    <span class="keyword">return</span> php_mt_rand_range(min, max);</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">umax++;</span><br><span class="line">...</span><br><span class="line">result = php_mt_rand();</span><br><span class="line">...</span><br><span class="line"><span class="keyword">return</span> (zend_long)((result % umax) + min);</span><br></pre></td></tr></table></figure>
+<p>根据代码我们可以看到，<code>mt_rand</code>函数不带范围的时候，输出的结果为<code>php_mt_rand() &gt;&gt; 1</code>；而带范围的时候，输出的结果为<code>(php_mt_rand() % (max-min+1)) + min</code>。通过<code>mt_rand()</code>不可以直接计算出<code>mt_rand(min, max)</code>，存在一些误差。</p>
+<p>由于上述原因，之前用来爆破随机数种子的工具已经无法直接使用。我自己实现了一个<a href="/downloads/mt_rand.c">多线程爆破种子的c程序</a>，在4核2G内存的虚拟机上跑了大概4个小时才将种子遍历完毕。</p>
+<h3 id="random-int-random-bytes"><a href="#random-int-random-bytes" class="headerlink" title="random_int / random_bytes"></a>random_int / random_bytes</h3><p>php7 提供了更加安全的随机数产生函数，<code>random_int</code>和<code>random_bytes</code>调用了系统的一些安全的随机数产生函数来输出。</p>
+<blockquote>
+<ul>
+<li>On Windows, » CryptGenRandom() will always be used.</li>
+<li>On Linux, the » getrandom(2) syscall will be used if available.</li>
+<li>On other platforms, /dev/urandom will be used.</li>
+<li>If none of the aforementioned sources are available, then an Exception will be thrown.</li>
+</ul>
+</blockquote>
+<h2 id="php的运行模式对随机数产生的影响"><a href="#php的运行模式对随机数产生的影响" class="headerlink" title="php的运行模式对随机数产生的影响"></a>php的运行模式对随机数产生的影响</h2><h3 id="Apache2handler"><a href="#Apache2handler" class="headerlink" title="Apache2handler"></a>Apache2handler</h3><p>在<code>/sapi/apache2handler/sapi_apache2.c</code>中<code>static int php_handler(request_rec *r)</code>函数可以看到，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ctx = SG(server_context);</span><br><span class="line">parent_req = ctx-&gt;r;</span><br><span class="line">...</span><br><span class="line"><span class="keyword">if</span> (!parent_req) &#123;</span><br><span class="line">		php_apache_request_dtor(r);</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<p>只有在<code>parent_req</code>为<code>NULL</code>的情况下，才会运行到<code>php_apache_request_dtor</code>，调用<code>php_request_shutdown</code>，这个函数会调用注册的<code>PHP_RSHUTDOWN_FUNCTION</code>，导致随机数的种子被标记为未初始化。</p>
+<p>在Apache下，一个 Connection 中的所有 request 都交给一个 Apache 的进程处理。很可能没有调用到<code>php_apache_request_dtor</code>导致在一个 Connection 中的请求共用一个种子。（未测试）</p>
+<h3 id="php-fpm"><a href="#php-fpm" class="headerlink" title="php-fpm"></a>php-fpm</h3><p>在<code>/sapi/fpm/fpm/fpm_main.c</code>中<code>int main(int argc, char *argv[])</code>函数可以看到，<code>php-fpm</code>的进程会循环处理请求，请求结束后调用<code>php_request_shutdown</code>函数进行清理。因此，在<code>php-fpm</code>的环境下，每个请求用的都是一个新的种子。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="http://www.mscs.dal.ca/~selinger/random/" target="_blank" rel="noopener">http://www.mscs.dal.ca/~selinger/random/</a><br><a href="http://www.openwall.com/php_mt_seed/" target="_blank" rel="noopener">http://www.openwall.com/php_mt_seed/</a><br><a href="https://github.com/lt/PHP-MT19937/tree/master/lib" target="_blank" rel="noopener">https://github.com/lt/PHP-MT19937/tree/master/lib</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2017/06/php里的随机数/" data-id="cjzj8jsyr0026gnpjvv1jihhj" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2017/06/php里的随机数/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2017/06/php里的随机数/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2017/06/关于联通机顶盒/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    关于联通机顶盒
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2017/02/CDN环路攻击/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">CDN安全小结</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/业务逻辑中的session问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/业务逻辑中的session问题/" class="title">业务逻辑中的session问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-16T16:00:00.000Z" itemprop="datePublished">2018-04-17</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2017/06/php里的随机数/';
+        
+        this.page.identifier = 'php里的随机数';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
